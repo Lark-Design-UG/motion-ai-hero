@@ -1,0 +1,81 @@
+* {
+  box-sizing: border-box;
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 11px;
+  width: 329px;
+  height: 90px;
+  row-gap: 4px;
+  backdrop-filter: blur(32px);
+
+  .aIActionItem {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    column-gap: 8px;
+    padding-right: 3px;
+    padding-left: 3px;
+    width: 294px;
+    height: 28px;
+
+    .frame2147223617 {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      column-gap: 10px;
+      height: 24px;
+
+      .iconMeetingAiFilled {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .deepThinking {
+      display: -webkit-box;
+      flex-grow: 1;
+      background: linear-gradient(
+        90deg,
+        #646a73 0%,
+        #e3e3e3 11.46%,
+        #646a73 23.36%
+      );
+      background-clip: text;
+      overflow: hidden;
+      line-height: 20px;
+      letter-spacing: 0;
+      color: transparent;
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      -webkit-background-clip: text;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  .generatingProjectRep {
+    display: -webkit-box;
+    flex-shrink: 0;
+    align-self: stretch;
+    padding: 0px 3px 13px;
+    width: 308px;
+    height: 41px;
+    overflow: hidden;
+    line-height: 28px;
+    letter-spacing: -0.13px;
+    color: var(--token-text-title, #1f2329);
+    font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+  }
+}

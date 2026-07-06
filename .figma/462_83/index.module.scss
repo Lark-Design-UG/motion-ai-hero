@@ -1,0 +1,192 @@
+* {
+  box-sizing: border-box;
+}
+
+.keyframe3 {
+  display: flex;
+  align-items: flex-start;
+  background: #f6f7f8;
+  padding-top: 43px;
+  width: 840px;
+  height: 623px;
+  overflow: hidden;
+
+  .autoWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    margin-top: 19px;
+    margin-left: -48px;
+
+    .aContainerReminder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 74px;
+      border: 1px solid #94b4ff;
+      border-radius: 7px;
+      background: var(--Neutral-00, #ffffff);
+      width: 134px;
+      height: 86px;
+      overflow: hidden;
+    }
+
+    .aContainerDashboard {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-top: 116px;
+      border: 1px solid #94b4ff;
+      border-radius: 9px;
+      background: #ffffffcc;
+      padding: 8px;
+      overflow: hidden;
+      row-gap: 9px;
+      backdrop-filter: blur(12px);
+    }
+
+    .aContainerGantt {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-top: 99px;
+      margin-left: 92px;
+      outline-width: 1px;
+      outline-style: solid;
+      outline-color: #94b4ff;
+      border-radius: 8px;
+      background: #ffffffcc;
+      padding: 9px;
+      overflow: hidden;
+      row-gap: 10px;
+      backdrop-filter: blur(2px);
+    }
+  }
+
+  .autoWrapper6 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    margin-left: 4px;
+
+    .autoWrapper2 {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      justify-content: space-between;
+      padding-right: 227px;
+      padding-left: 0;
+
+      .aContainerDoc {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        border: 1px solid #94b4ff;
+        border-radius: 9px;
+        background: #ffffffcc;
+        padding: 8px;
+        width: 179px;
+        row-gap: 9px;
+        backdrop-filter: blur(12px);
+      }
+
+      .aContainerIm {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        border: 1px solid #94b4ff;
+        border-radius: 9px;
+        background: #ffffff;
+        padding: 9px;
+        width: 204px;
+        height: 124px;
+        row-gap: 9px;
+        backdrop-filter: blur(71px);
+      }
+    }
+
+    .autoWrapper5 {
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      justify-content: space-between;
+      margin-top: 65px;
+      padding-right: 0;
+      padding-left: 44px;
+
+      .autoWrapper3 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        align-self: stretch;
+
+        .input {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          border-radius: 10px;
+          background: #ffffff;
+          padding: 11px;
+          width: 329px;
+          row-gap: 4px;
+          backdrop-filter: blur(32px);
+        }
+
+        .aContainerWorkflow {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: flex-start;
+          margin-top: 74px;
+          margin-left: 47px;
+          border: 1px solid #94b4ff;
+          border-radius: 8px;
+          background: #ffffffcc;
+          padding: 8px 10px;
+          row-gap: 8px;
+          backdrop-filter: blur(12px);
+        }
+      }
+
+      .autoWrapper4 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        align-self: stretch;
+        margin-top: 34px;
+
+        .aContainerTask {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          margin-left: 119px;
+          border: 1px solid #94b4ff;
+          border-radius: 9px;
+          background: #ffffffcc;
+          padding: 8px;
+          width: 190px;
+          overflow: hidden;
+          row-gap: 9px;
+          backdrop-filter: blur(12px);
+        }
+
+        .aContainerFlow {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          margin-top: 48px;
+          border: 1px solid #94b4ff;
+          border-radius: 10px;
+          background: #ffffffcc;
+          padding: 8px;
+          width: 207px;
+          height: 151px;
+          overflow: hidden;
+          row-gap: 9px;
+          backdrop-filter: blur(23px);
+        }
+      }
+    }
+  }
+}

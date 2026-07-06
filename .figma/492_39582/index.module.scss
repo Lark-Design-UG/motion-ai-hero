@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+
+.iconBitablegridOutli {
+  display: flex;
+  align-items: flex-start;
+  border-radius: 7px;
+  background: var(--palette-indigo-50, #f2f3fd);
+  padding: 5px;
+  width: 24px;
+  height: 24px;
+
+  .iconBurnlifeMinuteOu {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    overflow: hidden;
+  }
+}

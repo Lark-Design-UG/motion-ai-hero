@@ -1,0 +1,444 @@
+* {
+  box-sizing: border-box;
+}
+
+.frame2147229950 {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #94b4ff;
+  border-radius: 10px;
+  background: #ffffffcc;
+  padding: 8px;
+  width: 207px;
+  height: 151px;
+  overflow: hidden;
+  row-gap: 9px;
+  backdrop-filter: blur(23px);
+
+  .text {
+    flex-shrink: 0;
+    line-height: 10px;
+    letter-spacing: -0.05px;
+    color: var(--palette-Neutral-900, #1f2329);
+    font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+    font-size: 6px;
+    font-weight: 600;
+  }
+
+  .a0824 {
+    flex-shrink: 0;
+    line-height: 10px;
+    letter-spacing: 0;
+    color: var(--token-icon-n2, #646a73);
+    font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+    font-size: 7px;
+  }
+
+  .iconCalendarLineOutl {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+  }
+
+  .frame1321315864 {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    column-gap: 4px;
+  }
+
+  .frame1321315606 {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    align-self: stretch;
+    column-gap: 2px;
+    margin-right: 13px;
+    height: 10px;
+
+    .field1 {
+      flex-shrink: 0;
+      line-height: 10px;
+      letter-spacing: 0;
+      color: var(--token-icon-n2, #646a73);
+      font-family: "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 7px;
+    }
+  }
+
+  .aDIconButton {
+    flex-shrink: 0;
+
+    .iconMoreOutlined {
+      width: 8px;
+      height: 8px;
+    }
+  }
+
+  .frame1564969 {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    align-self: stretch;
+    column-gap: 6px;
+    margin-right: 108px;
+
+    .iconBitablegridOutli {
+      flex-shrink: 0;
+      border-radius: 5px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .taskKanban {
+      flex-shrink: 0;
+      line-height: 16px;
+      letter-spacing: 0;
+      color: var(--token-text-title, #1f2329);
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+    }
+  }
+
+  .frame2147229953 {
+    display: flex;
+    flex-shrink: 0;
+    align-items: flex-start;
+    align-self: stretch;
+    justify-content: space-between;
+
+    .rectangle3462416472 {
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: #f6f6f6;
+      width: 51px;
+      height: 4px;
+    }
+
+    .rectangle346241649 {
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: #f6f6f6;
+      width: 21px;
+      height: 4px;
+    }
+
+    .rectangle346241647 {
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: #f6f6f6;
+      width: 43px;
+      height: 4px;
+    }
+
+    .aDTagOption {
+      flex-shrink: 0;
+    }
+
+    .frame1321315588 {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      column-gap: 2px;
+      margin-right: 4px;
+      height: 11px;
+    }
+
+    .kAnbanCard2 {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      border: 1px solid #d0d3d680;
+      border-radius: 4px;
+      background: var(--token-bg-float, #ffffff);
+      padding: 8px;
+      width: 90px;
+      overflow: hidden;
+      row-gap: 4px;
+
+      .frame21472299542 {
+        display: inline-flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        margin-right: 10px;
+        row-gap: 4px;
+
+        .rectangle3462416482 {
+          flex-shrink: 0;
+          border-radius: 6px;
+          background: #f6f6f6;
+          width: 10px;
+          height: 3px;
+        }
+
+        .frame21472236193 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          column-gap: 1px;
+
+          .rectangle3462416473 {
+            flex-shrink: 0;
+            border-radius: 6px;
+            background: #f6f6f6;
+            width: 36px;
+            height: 3px;
+          }
+
+          .rectangle3462416492 {
+            flex-shrink: 0;
+            border-radius: 6px;
+            background: #f6f6f6;
+            width: 17px;
+            height: 3px;
+          }
+        }
+
+        .frame21472236194 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          column-gap: 1px;
+          margin-right: 12px;
+
+          .rectangle3462416474 {
+            flex-shrink: 0;
+            border-radius: 6px;
+            background: #f6f6f6;
+            width: 42px;
+            height: 3px;
+          }
+        }
+      }
+    }
+
+    .frame2036085532 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 90px;
+      row-gap: 8px;
+
+      .tag {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        justify-content: space-between;
+        margin-right: -1px;
+        min-width: 91px;
+      }
+
+      .kAnbanCard {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        border: 1px solid #d0d3d680;
+        border-radius: 4px;
+        background: var(--token-bg-float, #ffffff);
+        padding: 8px;
+        overflow: hidden;
+        row-gap: 4px;
+
+        .frame2147229954 {
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          row-gap: 5px;
+
+          .rectangle346241648 {
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: #f6f6f6;
+            width: 12px;
+            height: 4px;
+          }
+
+          .frame2147223619 {
+            display: inline-flex;
+            flex-shrink: 0;
+            align-items: flex-start;
+            align-self: stretch;
+            column-gap: 1px;
+            margin-right: -4px;
+          }
+
+          .frame21472236192 {
+            display: inline-flex;
+            flex-shrink: 0;
+            align-items: flex-start;
+            align-self: stretch;
+            column-gap: 1px;
+            margin-right: 10px;
+          }
+        }
+      }
+    }
+
+    .frame2036085533 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 90px;
+      row-gap: 8px;
+
+      .frame13213158642 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 4px;
+        width: 91px;
+      }
+
+      .kAnbanCard3 {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        border: 1px solid #d0d3d680;
+        border-radius: 4px;
+        background: var(--token-bg-float, #ffffff);
+        padding: 8px;
+        overflow: hidden;
+        row-gap: 4px;
+
+        .frame21472299543 {
+          display: inline-flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          margin-right: 1px;
+          row-gap: 5px;
+
+          .frame2147223609 {
+            display: inline-flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            align-self: stretch;
+            margin-right: 9px;
+            height: 4px;
+            row-gap: 6px;
+
+            .frame21472236195 {
+              display: inline-flex;
+              flex-shrink: 0;
+              align-items: flex-start;
+              align-self: stretch;
+              column-gap: 1px;
+              height: 4px;
+            }
+          }
+
+          .frame21472236092 {
+            display: inline-flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            align-self: stretch;
+            height: 4px;
+            row-gap: 6px;
+
+            .frame21472236196 {
+              display: inline-flex;
+              flex-shrink: 0;
+              align-items: flex-start;
+              align-self: stretch;
+              column-gap: 1px;
+
+              .rectangle3462416475 {
+                flex-shrink: 0;
+                border-radius: 8px;
+                background: #f6f6f6;
+                width: 52px;
+                height: 4px;
+              }
+            }
+          }
+
+          .frame21472236093 {
+            display: inline-flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            align-self: stretch;
+            margin-right: 23px;
+            height: 4px;
+            row-gap: 6px;
+
+            .frame21472236197 {
+              display: inline-flex;
+              flex-shrink: 0;
+              align-items: flex-start;
+              align-self: stretch;
+              column-gap: 1px;
+              height: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .frame2036085531 {
+    display: flex;
+    position: absolute;
+    top: 35px;
+    left: -91px;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: flex-start;
+    width: 90px;
+    height: 141px;
+    row-gap: 8px;
+
+    .tag2 {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      justify-content: space-between;
+      margin-right: -1px;
+      min-width: 90px;
+    }
+
+    .kAnbanCard4 {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      border: 1px solid #d0d3d680;
+      border-radius: 4px;
+      background: var(--token-bg-float, #ffffff);
+      padding: 8px;
+      width: 90px;
+      overflow: hidden;
+      row-gap: 4px;
+
+      .frame13213155882 {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        column-gap: 2px;
+        margin-right: 6px;
+        height: 11px;
+      }
+    }
+  }
+}

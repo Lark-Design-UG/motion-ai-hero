@@ -1,0 +1,104 @@
+* {
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #94b4ff;
+  border-radius: 9px;
+  background: #ffffffcc;
+  padding: 8px;
+  width: 179px;
+  height: 106px;
+  row-gap: 9px;
+  backdrop-filter: blur(12px);
+
+  .frame2147229951 {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: flex-start;
+    align-self: stretch;
+    column-gap: 6px;
+    margin-right: 111px;
+
+    .frame2053140079 {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      column-gap: 6px;
+      border-radius: 5px;
+      background: var(--primary-1, #e8f2ff);
+      padding-top: 2px;
+      padding-bottom: 2px;
+      width: 18px;
+      height: 18px;
+
+      .iconSpaceFilled {
+        flex-shrink: 0;
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    .title {
+      flex-shrink: 0;
+      line-height: 16px;
+      letter-spacing: 0;
+      color: var(--token-text-title, #1f2329);
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+    }
+  }
+
+  .group2147229844 {
+    position: relative;
+    flex-shrink: 0;
+    width: 161px;
+    height: 61px;
+
+    .unsplashCkh9F7Wjn9U {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0.8;
+      border-radius: 4px;
+      width: 161px;
+      height: 61px;
+    }
+
+    .aSecondLevelSubpa {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      width: 63px;
+      height: 22px;
+      line-height: 11px;
+      letter-spacing: 0;
+      color: #ffffff;
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: UPPERCASE;
+    }
+
+    .aSecondLevelSubpa2 {
+      position: absolute;
+      top: 36px;
+      left: 70px;
+      opacity: 0.4;
+      width: 86px;
+      height: 14px;
+      line-height: 34px;
+      letter-spacing: 0;
+      color: #ffffff;
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      text-transform: UPPERCASE;
+    }
+  }
+}

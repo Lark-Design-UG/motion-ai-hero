@@ -1,0 +1,218 @@
+* {
+  box-sizing: border-box;
+}
+
+.keyframe25 {
+  display: flex;
+  position: relative;
+  align-items: center;
+  background: #f6f7f8;
+  padding: 17px 20px 17px 17px;
+  width: 840px;
+  height: 623px;
+  overflow: hidden;
+
+  .autoWrapper {
+    position: absolute;
+    top: -1022px;
+    left: -1925px;
+    width: 4121px;
+    height: 4443px;
+
+    .ellipse33698203 {
+      position: absolute;
+      top: 352px;
+      left: 2532px;
+      border-radius: 50%;
+      width: 1589px;
+      height: 1589px;
+      rotate: -23deg;
+    }
+
+    .ellipse33698199 {
+      position: absolute;
+      top: 358px;
+      left: 1909px;
+      border-radius: 50%;
+      width: 938px;
+      height: 938px;
+      rotate: -62deg;
+    }
+
+    .ellipse33698201 {
+      position: absolute;
+      top: 1446px;
+      left: 1654px;
+      border-radius: 50%;
+      width: 1198px;
+      height: 1198px;
+      rotate: 129deg;
+    }
+
+    .ellipse33698204 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 50%;
+      width: 2155px;
+      height: 2155px;
+      rotate: -110deg;
+    }
+
+    .ellipse33698202 {
+      position: absolute;
+      top: 516px;
+      left: 1055px;
+      border-radius: 50%;
+      width: 2238px;
+      height: 3927px;
+      rotate: 90deg;
+    }
+  }
+
+  .autoWrapper5 {
+    display: flex;
+    position: relative;
+    align-items: center;
+    align-self: stretch;
+    justify-content: space-between;
+
+    .autoWrapper2 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+
+      .aContainerReminder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid #94b4ff;
+        border-radius: 8px;
+        background: var(--Neutral-00, #ffffff);
+        width: 220px;
+        height: 150px;
+        overflow: hidden;
+      }
+
+      .aContainerDashboard {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 22px;
+        border: 1px solid #94b4ff;
+        border-radius: 8px;
+        background: #ffffffcc;
+        padding: 11px;
+        width: 220px;
+        height: 171px;
+        overflow: hidden;
+        row-gap: 12px;
+        backdrop-filter: blur(17px);
+      }
+
+      .aContainerGantt {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 18px;
+        outline-width: 1px;
+        outline-style: solid;
+        outline-color: #94b4ff;
+        border-radius: 8px;
+        background: #ffffffcc;
+        padding: 12px;
+        height: 228px;
+        overflow: hidden;
+        row-gap: 13px;
+        backdrop-filter: blur(3px);
+      }
+    }
+
+    .autoWrapper3 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+
+      .aContainerDoc {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        border: 1px solid #94b4ff;
+        border-radius: 8px;
+        background: #ffffffcc;
+        padding: 11px;
+        width: 329px;
+        height: 235px;
+        row-gap: 12px;
+        backdrop-filter: blur(17px);
+      }
+
+      .input {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 18px;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 11px;
+        width: 329px;
+        row-gap: 4px;
+        backdrop-filter: blur(32px);
+      }
+
+      .aContainerWorkflow {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 18px;
+        border: 1px solid #94b4ff;
+        border-radius: 8px;
+        background: #ffffffcc;
+        padding: 11px 13px;
+        width: 329px;
+        height: 228px;
+        row-gap: 11px;
+        backdrop-filter: blur(17px);
+      }
+    }
+
+    .autoWrapper4 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+
+      .aContainerIm {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        border: 1px solid #94b4ff;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px;
+        width: 214px;
+        height: 233px;
+        row-gap: 12px;
+        backdrop-filter: blur(95px);
+      }
+
+      .aContainerTask {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 25px;
+        border: 1px solid #94b4ff;
+        border-radius: 8px;
+        background: #ffffffcc;
+        padding: 11px;
+        width: 214px;
+        height: 331px;
+        overflow: hidden;
+        row-gap: 12px;
+        backdrop-filter: blur(17px);
+      }
+    }
+  }
+}

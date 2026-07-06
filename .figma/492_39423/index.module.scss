@@ -1,0 +1,81 @@
+* {
+  box-sizing: border-box;
+}
+
+.desktopBlockCardSche {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 9px;
+  box-shadow: 0px 8px 24px 0px #3e4f6b0f;
+  background: var(--Neutral-00, #ffffff);
+  padding: 0px 12px 12px;
+  width: 259px;
+  height: 139px;
+  overflow: hidden;
+  row-gap: 12px;
+  backdrop-filter: blur(22px);
+
+  .cardBackgroundColor {
+    display: flex;
+    flex-shrink: 0;
+    align-items: flex-start;
+    align-self: stretch;
+    margin-right: -12px;
+    margin-left: -12px;
+    background: var(--palette-purple-100, #efe6fe);
+    padding: 12px 149px 10px 12px;
+    overflow: hidden;
+
+    .summaryOfH5Design {
+      line-height: 20px;
+      letter-spacing: -0.1px;
+      color: var(--palette-purple-600, #7a35f0);
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
+
+  .frame2147229955 {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: center;
+    align-self: stretch;
+    row-gap: 8px;
+
+    .hiThereIsATaskDueTod {
+      flex-shrink: 0;
+      align-self: stretch;
+      width: 235px;
+      line-height: 17px;
+      letter-spacing: 0;
+      color: var(--token-text-title, #1f2329);
+      font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 11px;
+    }
+
+    .frame {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      justify-content: center;
+      column-gap: 10px;
+      border: 1px solid var(--token-primary-pri-400, #5083fb);
+      border-radius: 6px;
+      padding: 7px 54px;
+
+      .text {
+        flex-shrink: 0;
+        line-height: 14px;
+        letter-spacing: 0;
+        color: var(--token-primary-pri-400, #5083fb);
+        font-family: "Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+      }
+    }
+  }
+}

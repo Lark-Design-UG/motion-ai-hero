@@ -1,0 +1,18 @@
+* {
+  box-sizing: border-box;
+}
+
+.aContainerFlow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #94b4ff;
+  border-radius: 14px;
+  background: #ffffffcc;
+  padding: 11px;
+  width: 276px;
+  height: 201px;
+  overflow: hidden;
+  row-gap: 12px;
+  backdrop-filter: blur(30px);
+}

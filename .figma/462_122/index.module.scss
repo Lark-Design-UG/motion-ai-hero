@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+}
+
+.keyframe6 {
+  display: flex;
+  align-items: flex-start;
+  background: #f6f7f8;
+  padding: 108px 330px 121px 333px;
+  width: 840px;
+  height: 623px;
+  overflow: hidden;
+
+  .input {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 11px;
+    width: 177px;
+    height: 394px;
+    row-gap: 4px;
+    backdrop-filter: blur(32px);
+  }
+}

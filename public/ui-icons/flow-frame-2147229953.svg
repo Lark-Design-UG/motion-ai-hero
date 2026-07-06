@@ -1,0 +1,74 @@
+<svg width="288" height="181" viewBox="0 0 288 181" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title{font-family:"Lark Circular","PingFang SC",Arial,sans-serif;font-size:6px;font-weight:600;fill:#1f2329}
+    .meta{font-family:"Lark Circular","PingFang SC",Arial,sans-serif;font-size:7px;fill:#646a73}
+    .tag{font-family:"Lark Circular","PingFang SC",Arial,sans-serif;font-size:6px;font-weight:700;fill:#fff}
+    .line{fill:#f6f6f6}
+  </style>
+  <g transform="translate(0 0)">
+    <rect x="0" y="0" width="49" height="13" rx="6.5" fill="#D63D9F"/>
+    <text x="6" y="9" class="tag">Pending</text>
+    <g transform="translate(0 21)">
+      <rect x=".5" y=".5" width="89" height="58" rx="4" fill="#fff" stroke="#D0D3D6" stroke-opacity=".5"/>
+      <text x="8" y="18" class="title">Technical Development</text>
+      <text x="8" y="35" class="meta">▢  Deadline:  08/27</text>
+      <text x="8" y="50" class="meta">◇  Owner:  🔴 Cruz</text>
+    </g>
+    <g transform="translate(0 88)">
+      <rect x=".5" y=".5" width="89" height="58" rx="4" fill="#fff" stroke="#D0D3D6" stroke-opacity=".5"/>
+      <text x="8" y="18" class="title">Bug fix</text>
+      <text x="8" y="35" class="meta">▢  Deadline:  08/27</text>
+      <text x="8" y="50" class="meta">◇  Owner:  🔴 Cruz</text>
+    </g>
+  </g>
+  <g transform="translate(99 0)">
+    <rect x="0" y="0" width="62" height="13" rx="6.5" fill="#626AF7"/>
+    <text x="6" y="9" class="tag">In progress</text>
+    <circle cx="82" cy="6.5" r="1.1" fill="#646A73"/>
+    <circle cx="86" cy="6.5" r="1.1" fill="#646A73"/>
+    <circle cx="90" cy="6.5" r="1.1" fill="#646A73"/>
+    <g transform="translate(0 21)">
+      <rect x=".5" y=".5" width="89" height="74" rx="4" fill="#fff" stroke="#D0D3D6" stroke-opacity=".5"/>
+      <text x="8" y="18" class="title">UX/UI design</text>
+      <text x="8" y="35" class="meta">▢  Deadline:  08/24</text>
+      <text x="8" y="50" class="meta">◇  Owner:  🔴 Perez</text>
+      <rect x="8" y="60" width="43" height="4" rx="2" class="line"/>
+      <rect x="52" y="60" width="12" height="4" rx="2" class="line"/>
+      <rect x="65" y="60" width="21" height="4" rx="2" class="line"/>
+      <rect x="8" y="69" width="12" height="4" rx="2" class="line"/>
+      <rect x="21" y="69" width="51" height="4" rx="2" class="line"/>
+    </g>
+    <g transform="translate(0 104)">
+      <rect x=".5" y=".5" width="89" height="74" rx="4" fill="#fff" stroke="#D0D3D6" stroke-opacity=".5"/>
+      <text x="8" y="18" class="title">Design review</text>
+      <text x="8" y="35" class="meta">▢  Deadline:  08/24</text>
+      <text x="8" y="50" class="meta">◇  Owner:  🔴 Perez</text>
+      <rect x="8" y="60" width="36" height="3" rx="1.5" class="line"/>
+      <rect x="45" y="60" width="10" height="3" rx="1.5" class="line"/>
+      <rect x="56" y="60" width="17" height="3" rx="1.5" class="line"/>
+      <rect x="8" y="67" width="10" height="3" rx="1.5" class="line"/>
+      <rect x="19" y="67" width="42" height="3" rx="1.5" class="line"/>
+    </g>
+  </g>
+  <g transform="translate(198 0)">
+    <rect x="0" y="0" width="44" height="13" rx="6.5" fill="#24C69A"/>
+    <text x="7" y="9" class="tag">Done</text>
+    <g transform="translate(0 21)">
+      <rect x=".5" y=".5" width="89" height="84" rx="4" fill="#fff" stroke="#D0D3D6" stroke-opacity=".5"/>
+      <text x="8" y="18" class="title">Project team briefing</text>
+      <text x="8" y="35" class="meta">▢  Deadline:  08/20</text>
+      <text x="8" y="50" class="meta">◇  Owner:  🔴 Perez</text>
+      <rect x="8" y="60" width="43" height="4" rx="2" class="line"/>
+      <rect x="52" y="60" width="21" height="4" rx="2" class="line"/>
+      <rect x="8" y="70" width="52" height="4" rx="2" class="line"/>
+      <rect x="61" y="70" width="21" height="4" rx="2" class="line"/>
+      <rect x="8" y="80" width="51" height="4" rx="2" class="line"/>
+    </g>
+    <g transform="translate(0 114)">
+      <rect x=".5" y=".5" width="89" height="64" rx="4" fill="#fff" stroke="#D0D3D6" stroke-opacity=".5"/>
+      <text x="8" y="18" class="title">Design review</text>
+      <text x="8" y="35" class="meta">▢  Deadline:  08/24</text>
+      <text x="8" y="50" class="meta">◇  Owner:  🔴 Perez</text>
+    </g>
+  </g>
+</svg>
