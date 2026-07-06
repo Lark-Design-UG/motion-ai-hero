@@ -141,7 +141,7 @@ const stage1Layout = createStageLayout({
   input: { x: 398, y: 310, width: 44, height: 12, scale: 0.72, opacity: 0, zIndex: 100},
   workflow: { x: 293, y: 320, width: 254, height: 286, scale: 0.72, opacity: 0, transformOrigin: "bottom center" },
   flow: { x: 700, y: 640, width: 276, height: 201, scale: 0.72, opacity: 0 },
-  im: { x: 105, y: 150, width: 210, height: 400, scale: 1, opacity: 1, zIndex: 2, borderRadius: 20 },
+  im: { x: 90, y: 150, width: 210, height: 400, scale: 1, opacity: 1, zIndex: 2, borderRadius: 20 },
   task: { x: 245, y: 60, width: 600, height: 480, scale: 1, opacity: 1, zIndex: 1, borderRadius: 16 },
 });
 
@@ -198,7 +198,7 @@ const stage6Layout = createStageLayout({
   dashboard: { opacity: 0 },
   gantt: { opacity: 0 },
   doc: { opacity: 0 },
-  input: { x: 105, y: 150, width: 210, height: 400, scale: 1, opacity: 1, zIndex: 100, borderRadius: 20, transformOrigin: "center" },
+  input: { x: 90, y: 150, width: 210, height: 400, scale: 1, opacity: 1, zIndex: 100, borderRadius: 20, transformOrigin: "center" },
   workflow: { opacity: 0 },
   flow: { x: 700, y: 640, width: 276, height: 201, scale: 1, opacity: 1 },
   im: { opacity: 0 },

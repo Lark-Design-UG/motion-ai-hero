@@ -30,6 +30,9 @@ const getStage4SweepProgress = (frame: number) => {
 export const getGradientBorderBackground = (angle: number) =>
   `conic-gradient(from ${angle}deg, #4b79ff 0deg, #6785ff 95deg, #ff8cf4 205deg, #ff9a45 300deg, #4b79ff 360deg)`;
 
+export const getStage4Border = (opacity: number, width = 0.75) =>
+  `${width}px solid rgba(148, 180, 255, ${opacity})`;
+
 const getStage2BorderOpacity = (frame: number) => {
   const stage1End = stageFrames.stage1;
   const stage2Start = stage1End;
@@ -223,6 +226,11 @@ export const UIContainer: React.FC<{
             background,
             backdropFilter,
             overflow: "hidden",
+            border:
+              stage4BorderOpacity > 0
+                ? getStage4Border(stage4BorderOpacity, borderWidth)
+                : undefined,
+            boxSizing: "border-box",
           }}
         >
           {debugLabel}
@@ -252,7 +260,7 @@ export const UIContainer: React.FC<{
     <div
       style={{
         ...baseStyle,
-        border: `${borderWidth}px solid rgba(148, 180, 255, ${borderOpacity})`,
+        border: getStage4Border(borderOpacity, borderWidth),
       }}
     >
       {debugLabel}

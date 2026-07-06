@@ -10,6 +10,7 @@ import {
   stage4To5ContentDelayFrames,
   stageFrames,
 } from "./containers/layout";
+import { getStage4Border } from "./containers/UIContainer";
 import { SHOW_GRADIENT_ENDPOINT_MARKERS } from "./debug";
 
 const lineColor = "#94b4ff";
@@ -203,6 +204,8 @@ const networkEllipses = [
   }, // 中间的长线
 ] as const;
 
+const stage4NodeBorder = getStage4Border(1, 0.75);
+
 const nodeBaseStyle: React.CSSProperties = {
   position: "absolute",
   display: "flex",
@@ -211,8 +214,9 @@ const nodeBaseStyle: React.CSSProperties = {
   justifyContent: "center",
   width: 60,
   height: 60,
-  border: `1px solid ${lineColor}`,
+  border: stage4NodeBorder,
   borderRadius: 12,
+  boxSizing: "border-box",
   background:
     "linear-gradient(316.61deg, #ffffff 10.27%, rgba(255, 255, 255, 0) 93.93%)",
   backdropFilter: "blur(27px)",
@@ -236,6 +240,9 @@ const avatarStyle: React.CSSProperties = {
   objectFit: "cover",
 };
 
+/** Stage 4 network graph center-left junction icon — replace the SVG file directly. */
+const NETWORK_CENTER_HUB_ICON = "ui-icons/network-center-hub.svg";
+
 const squareIconStyle: React.CSSProperties = {
   position: "absolute",
   display: "flex",
@@ -243,8 +250,9 @@ const squareIconStyle: React.CSSProperties = {
   justifyContent: "center",
   width: 32,
   height: 32,
-  border: `1px solid ${lineColor}`,
+  border: stage4NodeBorder,
   borderRadius: 8,
+  boxSizing: "border-box",
   background:
     "linear-gradient(151.53deg, rgba(255, 255, 255, 0.76) 11.93%, rgba(255, 255, 255, 0.45) 89.29%)",
   backdropFilter: "blur(9px)",
@@ -285,8 +293,9 @@ const SmallIconNode: React.FC<{
   floatX: number;
   floatY: number;
   image?: string;
+  iconSrc?: string;
   children?: React.ReactNode;
-}> = ({ x, y, progress, floatX, floatY, image, children }) => {
+}> = ({ x, y, progress, floatX, floatY, image, iconSrc, children }) => {
   const nodeScale = 0.62 + progress * 0.38;
 
   return (
@@ -300,7 +309,9 @@ const SmallIconNode: React.FC<{
         transformOrigin: "center",
       }}
     >
-      {image ? (
+      {iconSrc ? (
+        <Img src={staticFile(iconSrc)} style={{ width: 18, height: 18 }} />
+      ) : image ? (
         <Img
           src={staticFile(`figma/${image}`)}
           style={{ width: 18, height: 18 }}
@@ -556,25 +567,10 @@ export const Stage4NetworkBackground = () => {
       <SmallIconNode
         x={176}
         y={324}
+        iconSrc={NETWORK_CENTER_HUB_ICON}
         progress={nodeProgress}
         {...getFloatOffset("org-icon", frame, nodeProgress)}
-      >
-        <div
-          style={{
-            width: 18,
-            height: 18,
-            borderRadius: 999,
-            background: "#1da1ff",
-            color: "#fff",
-            fontSize: 11,
-            fontWeight: 800,
-            lineHeight: "18px",
-            textAlign: "center",
-          }}
-        >
-          o
-        </div>
-      </SmallIconNode>
+      />
     </AbsoluteFill>
   );
 };

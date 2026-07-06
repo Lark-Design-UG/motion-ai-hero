@@ -45,7 +45,7 @@ const revealStyle = (progress: number, start: number, end: number): CSSPropertie
 
 const inputFont =
   '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
-const inputPromptText = "Generate project report";
+const inputPromptText = "Draft this week's project update";
 const stage4AiTextDelayFrames = -12;
 const readyContentExitDelayFrames = 8;
 
@@ -616,21 +616,8 @@ export const ImResultView: React.FC<{
             <div style={{ display: "flex", flexDirection: "column", rowGap: 5 }}>
               <div style={{ display: "inline-flex", alignItems: "center", columnGap: 4 }}>
                 <p style={{ margin: 0, color: "#8f959e", fontSize: 8, lineHeight: "13px" }}>
-                  AnyGen AI Teammate
+                  AI Agent
                 </p>
-                <span
-                  style={{
-                    borderRadius: 3,
-                    background: "#ff811a26",
-                    padding: "0 3px",
-                    color: "#c25705",
-                    fontSize: 7,
-                    fontWeight: 500,
-                    lineHeight: "11px",
-                  }}
-                >
-                  BOT
-                </span>
               </div>
               <div style={revealStyle(messageProgress, 0.16, 0.42)}>
                 <ChatBubble>Your project report is ready to review.</ChatBubble>

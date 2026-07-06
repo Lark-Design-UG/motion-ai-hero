@@ -60,9 +60,16 @@ const cardStyle: CSSProperties = {
 };
 
 const contentPadding = 12;
-const stage4TaskGoalValue = 42;
-const stage4TaskCompletedValue = 31;
+const TASK_METRIC_GOAL_START = 208;
+const TASK_METRIC_COMPLETED_START = 146;
+const TASK_METRIC_GOAL_STAGE4 = 236;
+const TASK_METRIC_COMPLETED_STAGE4 = 224;
 const taskResetFrame = stageFrames.stage5;
+
+const getTaskMetricValues = (progress: number) => ({
+  goalValue: Math.round(lerp(TASK_METRIC_GOAL_START, TASK_METRIC_GOAL_STAGE4, progress)),
+  completedValue: Math.round(lerp(TASK_METRIC_COMPLETED_START, TASK_METRIC_COMPLETED_STAGE4, progress)),
+});
 
 const designs: Record<TaskVariant, { width: number; height: number }> = {
   large: { width: 643, height: 450 },
@@ -172,6 +179,7 @@ const MetricCard: React.FC<{ label: string; value: number; width: number; height
       padding: 16 * unit,
       boxSizing: "border-box",
       borderRadius: 10 * unit,
+      overflow: "hidden",
     }}
   >
     <p style={{ margin: 0, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${27 * unit}px` }}>{label}</p>
@@ -267,8 +275,7 @@ const MetricAndCountdown: React.FC<{ width: number; height: number; progress: nu
   const metricHeight = Math.max((height - gap) * (104 / 218), 1);
   const metricWidth = Math.max((width - gap) / 2, 1);
   const countdownHeight = Math.max(height - metricHeight - gap, 1);
-  const goalValue = Math.round(lerp(36, stage4TaskGoalValue, progress));
-  const completedValue = Math.round(lerp(24, stage4TaskCompletedValue, progress));
+  const { goalValue, completedValue } = getTaskMetricValues(progress);
 
   return (
   <div style={{ display: "flex", flexDirection: "column", rowGap: gap, width, height }}>
@@ -330,9 +337,16 @@ const DonutChart: React.FC<{ width: number; height: number }> = ({ width, height
   );
 };
 
-const ProgressCard: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+const ProgressCard: React.FC<{ width: number; height: number; goalValue: number; completedValue: number }> = ({
+  width,
+  height,
+  goalValue,
+  completedValue,
+}) => {
   const unit = Math.min(width / 316, height / 183);
   const innerWidth = Math.max(width - 32 * unit, 1);
+  const progressRatio = goalValue > 0 ? completedValue / goalValue : 0;
+  const progressPercent = Math.round(progressRatio * 100);
 
   return (
   <div
@@ -351,11 +365,13 @@ const ProgressCard: React.FC<{ width: number; height: number }> = ({ width, heig
   >
     <p style={{ alignSelf: "stretch", margin: 0, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${27 * unit}px` }}>Overall progress</p>
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", rowGap: 10 * unit, width: innerWidth }}>
-      <p style={{ margin: 0, color: "#1f2329", fontSize: 32 * unit, fontWeight: 800, lineHeight: `${32 * unit}px` }}>67%</p>
+      <p style={{ margin: 0, color: "#1f2329", fontSize: 32 * unit, fontWeight: 800, lineHeight: `${32 * unit}px` }}>{progressPercent}%</p>
       <div style={{ width: innerWidth, height: 14 * unit, borderRadius: 4 * unit, background: "#f4f6f9", overflow: "hidden" }}>
-        <div style={{ width: innerWidth * 0.61, height: "100%", borderRadius: 4 * unit, background: "#4294ff" }} />
+        <div style={{ width: innerWidth * progressRatio, height: "100%", borderRadius: 4 * unit, background: "#4294ff" }} />
       </div>
-      <p style={{ margin: 0, opacity: 0.4, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${25 * unit}px` }}>Current 24 | Goal 36</p>
+      <p style={{ margin: 0, opacity: 0.4, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${25 * unit}px` }}>
+        {`Current ${completedValue} | Goal ${goalValue}`}
+      </p>
     </div>
   </div>
   );
@@ -422,6 +438,7 @@ const DashboardContent: React.FC<{ frame: number; width: number; height: number 
   const { from, to, progress } = getTaskState(frame);
   const stage4Progress = getStage4StateChangeProgress(frame);
   const metricProgress = frame >= taskResetFrame ? 0 : stage4Progress;
+  const { goalValue, completedValue } = getTaskMetricValues(metricProgress);
   const designWidth = lerp(designs[from].width, designs[to].width, progress);
   const designHeight = lerp(designs[from].height, designs[to].height, progress);
   const availableWidth = Math.max(width - contentPadding * 2, 1);
@@ -451,7 +468,12 @@ const DashboardContent: React.FC<{ frame: number; width: number; height: number 
           <DonutChart width={statusRect.width} height={statusRect.height} />
         </LayoutItem>
         <LayoutItem rect={progressRect}>
-          <ProgressCard width={progressRect.width} height={progressRect.height} />
+          <ProgressCard
+            width={progressRect.width}
+            height={progressRect.height}
+            goalValue={goalValue}
+            completedValue={completedValue}
+          />
         </LayoutItem>
         <LayoutItem rect={trendRect}>
           <TrendCard width={trendRect.width} height={trendRect.height} />

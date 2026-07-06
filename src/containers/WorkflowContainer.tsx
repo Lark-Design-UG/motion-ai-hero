@@ -9,7 +9,7 @@ const fontFamily =
 const stage4WorkflowExtendHeight = 80;
 
 export const workflowStage2GrowStartFrame = stageFrames.stage1 + 20;
-export const workflowStage2GrowDurationFrames = 40;
+export const workflowStage2GrowDurationFrames = 25;
 export const workflowStage2GrowStaggerFrames = 4;
 
 const workflowStage2GrowTiming = {

@@ -48,15 +48,13 @@ const getStage4AdaptiveImLayout = (layout: ContainerLayout, frame: number): Cont
     return layout;
   }
 
-  const reportProgress = getStage4ReportProgress(frame);
-  const conversationLayout = { width: 204, height: 165, borderRadius: 12 };
-  const reportLayout = { width: 204, height: 178, borderRadius: 12 };
+  const stage4Layout = { width: 204, height: 165, borderRadius: 12 };
 
   return {
     ...layout,
-    width: lerp(layout.width, lerp(conversationLayout.width, reportLayout.width, reportProgress), stage4Presence),
-    height: lerp(layout.height, lerp(conversationLayout.height, reportLayout.height, reportProgress), stage4Presence),
-    borderRadius: lerp(layout.borderRadius, lerp(conversationLayout.borderRadius, reportLayout.borderRadius, reportProgress), stage4Presence),
+    width: lerp(layout.width, stage4Layout.width, stage4Presence),
+    height: lerp(layout.height, stage4Layout.height, stage4Presence),
+    borderRadius: lerp(layout.borderRadius, stage4Layout.borderRadius, stage4Presence),
   };
 };
 
@@ -258,21 +256,8 @@ const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, hei
       <div style={{ display: "flex", flexDirection: "column", rowGap: 2.5 * unit, minWidth: 0 }}>
         <div style={{ display: "inline-flex", alignItems: "center", columnGap: 2 * unit }}>
           <p style={{ margin: 0, color: "#8f959e", fontSize: 5.5 * unit, lineHeight: `${8 * unit}px` }}>
-            AnyGen AI Teammate
+            AI Agent
           </p>
-          <span
-            style={{
-              borderRadius: 2 * unit,
-              background: "#ff811a26",
-              padding: `0 ${2 * unit}px`,
-              color: "#c25705",
-              fontSize: 4.5 * unit,
-              fontWeight: 700,
-              lineHeight: `${7 * unit}px`,
-            }}
-          >
-            BOT
-          </span>
         </div>
         <div
           style={{

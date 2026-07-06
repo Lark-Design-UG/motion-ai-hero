@@ -24,6 +24,12 @@ const docStage2GrowTiming = {
   staggerFrames: docStage2GrowStaggerFrames,
 };
 
+const DOC_COVER_DESIGN_WIDTH = 188;
+const DOC_COVER_DESIGN_HEIGHT = 75;
+
+const getDocCoverHeight = (bodyWidth: number) =>
+  bodyWidth * (DOC_COVER_DESIGN_HEIGHT / DOC_COVER_DESIGN_WIDTH);
+
 const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
 const smoothProgress = (frame: number, start: number, duration: number) => {
   const progress = clamp((frame - start) / duration);
@@ -221,7 +227,7 @@ const GeneratedDocText: React.FC<{ unit: number; progress: number }> = ({ unit, 
 const Stage4DocBody: React.FC<{ width: number; height: number; unit: number; frame: number }> = ({ width, height, unit, frame }) => {
   const generatedProgress = getStage4StateChangeProgress(frame);
   const coverSwitchProgress = smoothProgress(frame, getStage4SweepStart() + 20, 18);
-  const coverHeight = Math.max(48 * unit, height);
+  const coverHeight = getDocCoverHeight(width);
 
   return (
     <div style={{ position: "relative", width, height, overflow: "hidden" }}>
@@ -255,9 +261,10 @@ const DefaultDocBody: React.FC<{ width: number; height: number; unit: number; de
 }) => {
   const frame = useCurrentFrame();
   const detailProgress = clamp(detailsOpacity);
-  const gap = 10 * unit * detailProgress;
-  const detailsHeight = Math.min(56 * unit, height * 0.42) * detailProgress;
-  const coverHeight = Math.max(44 * unit, height - detailsHeight - gap);
+  const gap = detailProgress > 0 ? 10 * unit * detailProgress : 0;
+  const coverHeight = getDocCoverHeight(width);
+  const detailsHeight =
+    detailProgress > 0 ? Math.min(56 * unit, Math.max(0, height - coverHeight - gap)) * detailProgress : 0;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", rowGap: gap, width, height, minHeight: 0 }}>
