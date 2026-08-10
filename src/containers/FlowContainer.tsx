@@ -1,4 +1,6 @@
 import { Img, staticFile, useCurrentFrame } from "remotion";
+import { useCopy, useLocale } from "../localization";
+import { localizedFontWeight } from "../typography";
 import { getStage4StateChangeProgress, stageFrames, useContainerLayout } from "./layout";
 import { getStage2GrowStyle } from "./stage2Grow";
 import { UIContainer } from "./UIContainer";
@@ -20,6 +22,8 @@ const flowStage2GrowTiming = {
 
 const FlowContent: React.FC<{ width: number; height: number; progress: number }> = ({ width, height, progress }) => {
   const frame = useCurrentFrame();
+  const locale = useLocale();
+  const text = useCopy();
   const unit = Math.min(width / 207, height / 151);
   const padding = 7 * unit;
   const headerHeight = 18 * unit;
@@ -55,8 +59,8 @@ const FlowContent: React.FC<{ width: number; height: number; progress: number }>
         }}
       >
         <Img src={staticFile("ui-icons/flow-kanban.svg")} style={{ width: 18 * unit, height: 18 * unit, borderRadius: 5 * unit }} />
-        <p style={{ margin: 0, color: "#1f2329", fontSize: 9 * unit, fontWeight: 800, lineHeight: `${16 * unit}px` }}>
-          Task Kanban
+        <p style={{ margin: 0, color: "#1f2329", fontSize: 10.5 * unit, fontWeight: localizedFontWeight("heading", 700), lineHeight: `${16 * unit}px` }}>
+          {text.taskKanban}
         </p>
       </div>
       <div
@@ -70,7 +74,7 @@ const FlowContent: React.FC<{ width: number; height: number; progress: number }>
         }}
       >
         <Img
-          src={staticFile("ui-icons/Kanban.svg")}
+          src={staticFile(locale === "zh" ? "ui-icons/Kanban-CN.svg" : "ui-icons/Kanban.svg")}
           style={{
             display: "block",
             width: boardWidth,

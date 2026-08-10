@@ -1,12 +1,12 @@
 import type { CSSProperties } from "react";
 import { useCurrentFrame } from "remotion";
+import { useCopy } from "../localization";
 import { getStage4StateChangeProgress, getStage4SweepStart, stageFrames } from "./layout";
 import { useContainerLayout } from "./layout";
 import { getStage2GrowStyle } from "./stage2Grow";
 import { UIContainer } from "./UIContainer";
 
-const fontFamily =
-  '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
+const fontFamily = "var(--localized-ui-font)";
 
 export const reminderStage2GrowStartFrame = stageFrames.stage1 + 10;
 export const reminderStage2GrowDurationFrames = 30;
@@ -33,11 +33,23 @@ const smoothProgress = (frame: number, start: number, duration: number) => {
   return progress * progress * (3 - 2 * progress);
 };
 
-const ReminderContent: React.FC<{ width: number; height: number; frame: number }> = ({ width, height, frame }) => {
-  const unit = Math.min(width / 259, height / 139);
-  const headerHeight = 39 * unit;
-  const bodyPadding = 12 * unit;
-  const buttonHeight = Math.max(24 * unit, Math.min(31 * unit, height * 0.23));
+const ReminderContent: React.FC<{ width: number; height: number; frame: number; borderRadius: number }> = ({ width, height, frame, borderRadius }) => {
+  const text = useCopy();
+  const compactProgress = clamp((136 - height) / (136 - 105));
+  const animationUnit = lerp(1, 0.68, compactProgress);
+  const headerHeight = lerp(45, 31.806, compactProgress);
+  const contentInset = lerp(12, 11.875, compactProgress);
+  const bodyPaddingTop = lerp(12, 8, compactProgress);
+  const bodyPaddingBottom = lerp(12, 10, compactProgress);
+  const headerIconSize = lerp(24, 18, compactProgress);
+  const headerIconFontSize = lerp(18, 14, compactProgress);
+  const headerGap = lerp(8, 6, compactProgress);
+  const buttonHeight = lerp(31, 22.5, compactProgress);
+  const buttonRadius = lerp(6, 2.849, compactProgress);
+  const bodyFontSize = lerp(11, 7.5, compactProgress);
+  const bodyLineHeight = lerp(17, 12.5, compactProgress);
+  const buttonFontSize = lerp(12, 8.21, compactProgress);
+  const buttonLineHeight = lerp(14, 12.316, compactProgress);
   const completedProgress = getStage4StateChangeProgress(frame);
   const clickProgress = smoothProgress(frame, getStage4SweepStart() + 14, 12);
   const pressScale = 1 - Math.sin(Math.PI * clickProgress) * 0.035;
@@ -46,8 +58,8 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
   const textStyle: CSSProperties = {
     margin: 0,
     color: "#1f2329",
-    fontSize: 11 * unit,
-    lineHeight: `${17 * unit}px`,
+    fontSize: bodyFontSize,
+    lineHeight: `${bodyLineHeight}px`,
     fontFamily,
   };
 
@@ -59,7 +71,7 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
         width,
         height,
         overflow: "hidden",
-        borderRadius: 9 * unit,
+        borderRadius,
         background: "#fff",
         fontFamily,
       }}
@@ -70,13 +82,13 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
           alignItems: "center",
           width,
           height: headerHeight,
-          padding: `0 ${12 * unit}px`,
+          padding: `0 ${contentInset}px`,
           background: "#efe6fe",
           color: "#7a35f0",
-          fontSize: 12 * unit,
+          fontSize: lerp(12, 10.5, compactProgress),
           fontWeight: 600,
-          lineHeight: `${20 * unit}px`,
-          letterSpacing: -0.1 * unit,
+          lineHeight: `${lerp(20, 16, compactProgress)}px`,
+          letterSpacing: lerp(-0.1, -0.09, compactProgress),
           whiteSpace: "nowrap",
           overflow: "hidden",
           opacity: headerOpacity,
@@ -86,16 +98,16 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
           style={{
             display: "inline-grid",
             placeItems: "center",
-            width: 18 * unit,
-            height: 18 * unit,
-            marginRight: 8 * unit,
-            fontSize: 14 * unit,
+            width: headerIconSize,
+            height: headerIconSize,
+            marginRight: headerGap,
+            fontSize: headerIconFontSize,
             lineHeight: 1,
           }}
         >
           ⏰
         </span>
-        <span>Risk reminder</span>
+        <span>{text.riskReminder}</span>
       </div>
       <div
         style={{
@@ -105,13 +117,13 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
           justifyContent: "space-between",
           width,
           height: Math.max(height - headerHeight, 1),
-          padding: `${12 * unit}px ${bodyPadding}px ${bodyPadding}px`,
+          padding: `${bodyPaddingTop}px ${contentInset}px ${bodyPaddingBottom}px`,
         }}
       >
-        <p style={{ ...textStyle, ...getStage2GrowStyle(frame, 1, { origin: "left center", translateY: 4 * unit, ...reminderStage2GrowTiming }) }}>
-          Hi, there is a task due today.
+        <p style={{ ...textStyle, ...getStage2GrowStyle(frame, 1, { origin: "left center", translateY: 4 * animationUnit, ...reminderStage2GrowTiming }) }}>
+          {text.taskDueToday}
           <br />
-          Please complete it as soon as possible.
+          {text.completeSoon}
         </p>
         <div
           style={{
@@ -121,15 +133,15 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
             height: buttonHeight,
             position: "relative",
             overflow: "hidden",
-            border: `${Math.max(unit, 0.75)}px solid ${buttonColor}`,
-            borderRadius: 6 * unit,
+            border: `${lerp(1, 0.75, compactProgress)}px solid ${buttonColor}`,
+            borderRadius: buttonRadius,
             background: "transparent",
             color: buttonColor,
-            fontSize: 12 * unit,
+            fontSize: buttonFontSize,
             fontWeight: 600,
-            lineHeight: `${14 * unit}px`,
-            columnGap: 10 * unit,
-            transform: `${getStage2GrowStyle(frame, 2, { origin: "center", translateY: 5 * unit, ...reminderStage2GrowTiming }).transform} scale(${pressScale})`,
+            lineHeight: `${buttonLineHeight}px`,
+            columnGap: 10 * animationUnit,
+            transform: `${getStage2GrowStyle(frame, 2, { origin: "center", translateY: 5 * animationUnit, ...reminderStage2GrowTiming }).transform} scale(${pressScale})`,
             transformOrigin: "center",
             opacity: getStage2GrowStyle(frame, 2, reminderStage2GrowTiming).opacity,
           }}
@@ -139,7 +151,7 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
               position: "absolute",
               top: 0,
               bottom: 0,
-              width: 42 * unit,
+              width: 42 * animationUnit,
               background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent)",
               opacity: Math.sin(Math.PI * completedProgress) * 0.75,
               transform: `translateX(${lerp(-width * 0.55, width * 0.55, completedProgress)}px) skewX(-18deg)`,
@@ -150,19 +162,19 @@ const ReminderContent: React.FC<{ width: number; height: number; frame: number }
             style={{
               opacity: 1 - completedProgress,
               position: "absolute",
-              transform: `translateY(${-completedProgress * 8 * unit}px)`,
+              transform: `translateY(${-completedProgress * 8 * animationUnit}px)`,
             }}
           >
-            Follow up now
+            {text.followUpNow}
           </span>
           <span
             style={{
               opacity: completedProgress,
               position: "absolute",
-              transform: `translateY(${(1 - completedProgress) * 8 * unit}px)`,
+              transform: `translateY(${(1 - completedProgress) * 8 * animationUnit}px)`,
             }}
           >
-            Completed
+            {text.completed}
           </span>
         </div>
       </div>
@@ -175,10 +187,12 @@ export const ReminderContainer = () => {
   const layout = useContainerLayout("reminder");
   const contentWidth = Math.max(layout.width, 1);
   const contentHeight = Math.max(layout.height, 1);
+  const compactProgress = clamp((136 - contentHeight) / (136 - 105));
+  const borderRadius = lerp(12, 8.21, compactProgress);
 
   return (
-    <UIContainer layout={layout} background="rgba(255,255,255,0.8)" backdropFilter="blur(22px)" stage2GradientBorder>
-      <ReminderContent width={contentWidth} height={contentHeight} frame={frame} />
+    <UIContainer layout={layout} borderRadius={borderRadius} background="rgba(255,255,255,0.8)" backdropFilter="blur(22px)" stage2GradientBorder>
+      <ReminderContent width={contentWidth} height={contentHeight} frame={frame} borderRadius={borderRadius} />
     </UIContainer>
   );
 };

@@ -28,10 +28,22 @@ const getStage4SweepProgress = (frame: number) => {
 };
 
 export const getGradientBorderBackground = (angle: number) =>
-  `conic-gradient(from ${angle}deg, #4b79ff 0deg, #6785ff 95deg, #ff8cf4 205deg, #ff9a45 300deg, #4b79ff 360deg)`;
+  `conic-gradient(from ${angle}deg,
+rgb(114, 150, 255) 80deg,
+  #6785ff 155deg,
+rgb(187, 147, 214) 180deg,
+rgb(255, 112, 99) 205deg,
+#ff9b69 235deg,
+rgb(255, 165, 120) 260deg,
+rgb(197, 155, 225) 290deg,
+  #6785ff 335deg,
+  rgb(114, 150, 255) 360deg)`;
+
+const STAGE4_BORDER_RGB = "148, 180, 255";
+const STAGE4_BORDER_ALPHA = 0.45;
 
 export const getStage4Border = (opacity: number, width = 0.75) =>
-  `${width}px solid rgba(148, 180, 255, ${opacity})`;
+  `${width}px solid rgba(${STAGE4_BORDER_RGB}, ${opacity * STAGE4_BORDER_ALPHA})`;
 
 const getStage2BorderOpacity = (frame: number) => {
   const stage1End = stageFrames.stage1;

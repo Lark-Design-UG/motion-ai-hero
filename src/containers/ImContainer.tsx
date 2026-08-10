@@ -1,6 +1,8 @@
 import { Easing, Img, staticFile, useCurrentFrame } from "remotion";
 import type { ReactNode } from "react";
-import { englishSeanMessage, ImResultView, ScaledDesign, thaiSeanMessage } from "./InputContainer";
+import { useCopy, useLocale } from "../localization";
+import { localizedFontWeight } from "../typography";
+import { ImResultView, ScaledDesign, seanDisplayName, thaiSeanMessage } from "./InputContainer";
 import {
   type ContainerLayout,
   getStage1To2MorphProgress,
@@ -10,6 +12,7 @@ import {
   getStage3To4MorphProgress,
   stageFrames,
   useContainerLayout,
+  useLayoutVariant,
 } from "./layout";
 import { PhoneFrameBackdrop } from "./PhoneFrame";
 import { UIContainer } from "./UIContainer";
@@ -26,8 +29,7 @@ type ImVariant = "stage2" | "stage3" | "stage4";
 
 const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
 const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;
-const imFont =
-  '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
+const imFont = "var(--localized-ui-font)";
 
 const smoothProgress = (frame: number, start: number, duration: number) => {
   return Easing.bezier(0.16, 1, 0.3, 1)(clamp((frame - start) / duration));
@@ -41,14 +43,16 @@ const smoothRatio = (progress: number, start: number, end: number) => {
 
 const getStage4ReportProgress = (frame: number) => getStage4StateChangeProgress(frame);
 
-const getStage4AdaptiveImLayout = (layout: ContainerLayout, frame: number): ContainerLayout => {
+const getStage4AdaptiveImLayout = (layout: ContainerLayout, frame: number, wide: boolean): ContainerLayout => {
   const stage4Presence = smoothProgress(frame, getStage4VisualStart(), 12) * (1 - smoothProgress(frame, stageFrames.stage4, 18));
 
   if (stage4Presence <= 0) {
     return layout;
   }
 
-  const stage4Layout = { width: 204, height: 165, borderRadius: 12 };
+  const stage4Layout = wide
+    ? { width: 204, height: 124, borderRadius: 12 }
+    : { width: 204, height: 165, borderRadius: 12 };
 
   return {
     ...layout,
@@ -68,13 +72,18 @@ const mixRect = (from: Rect, to: Rect, progress: number): Rect => ({
 
 const contentPadding = 0;
 
-const designs: Record<ImVariant, { width: number; height: number }> = {
+const defaultDesigns: Record<ImVariant, { width: number; height: number }> = {
   stage2: { width: 266, height: 273 },
   stage3: { width: 328, height: 240 },
   stage4: { width: 204, height: 165 },
 };
 
-const rects: Record<ImVariant, Record<"sidebar" | "main" | "projectHeader" | "messengerHeader" | "messages" | "input", Rect>> = {
+type ImRects = Record<
+  ImVariant,
+  Record<"sidebar" | "main" | "projectHeader" | "messengerHeader" | "messages" | "input", Rect>
+>;
+
+const defaultRects: ImRects = {
   stage2: {
     sidebar: { x: -160, y: 0, width: 126, height: 273, opacity: 0 },
     main: { x: 0, y: 0, width: 266, height: 273, opacity: 1 },
@@ -90,6 +99,39 @@ const rects: Record<ImVariant, Record<"sidebar" | "main" | "projectHeader" | "me
     messengerHeader: { x: 12, y: 12, width: 104, height: 24, opacity: 0 },
     messages: { x: 141, y: 58, width: 175, height: 118, opacity: 1 },
     input: { x: 141, y: 198, width: 175, height: 30, opacity: 1 },
+  },
+  stage4: {
+    sidebar: { x: -160, y: 0, width: 126, height: 165, opacity: 0 },
+    main: { x: 0, y: 0, width: 204, height: 165, opacity: 1 },
+    projectHeader: { x: 9, y: 9, width: 186, height: 18, opacity: 0 },
+    messengerHeader: { x: 9, y: 9, width: 186, height: 18, opacity: 1 },
+    messages: { x: 9, y: 36, width: 186, height: 122, opacity: 1 },
+    input: { x: 9, y: 166, width: 186, height: 0, opacity: 0 },
+  },
+};
+
+const wideDesigns: Record<ImVariant, { width: number; height: number }> = {
+  stage2: { width: 393, height: 233 },
+  stage3: { width: 448, height: 154 },
+  stage4: { width: 204, height: 165 },
+};
+
+const wideRects: ImRects = {
+  stage2: {
+    sidebar: { x: 10, y: 10, width: 151, height: 255.979, opacity: 1 },
+    main: { x: 171, y: 10, width: 212, height: 213, opacity: 1 },
+    projectHeader: { x: 171, y: 10, width: 212, height: 24, opacity: 1 },
+    messengerHeader: { x: 10, y: 10, width: 97, height: 24, opacity: 0 },
+    messages: { x: 171, y: 50, width: 212, height: 115.09, opacity: 1 },
+    input: { x: 175, y: 197, width: 204, height: 26, opacity: 1 },
+  },
+  stage3: {
+    sidebar: { x: 10, y: 10, width: 142, height: 251.979, opacity: 1 },
+    main: { x: 168, y: 10, width: 270, height: 134, opacity: 1 },
+    projectHeader: { x: 168, y: 10, width: 270, height: 24, opacity: 1 },
+    messengerHeader: { x: 10, y: 10, width: 97, height: 24, opacity: 0 },
+    messages: { x: 168, y: 42, width: 270, height: 64, opacity: 1 },
+    input: { x: 172, y: 118, width: 262, height: 26, opacity: 1 },
   },
   stage4: {
     sidebar: { x: -160, y: 0, width: 126, height: 165, opacity: 0 },
@@ -157,15 +199,19 @@ const SendIcon: React.FC<{ size: number }> = ({ size }) => (
 );
 
 const HeaderRow: React.FC<{ width: number; height: number; type: "project" | "messenger" }> = ({ width, height, type }) => {
-  const unit = Math.min(width / 180, height / 24);
+  const text = useCopy();
+  const compactProgress = clamp((24 - height) / 6);
   const iconSize = height;
+  const gap = lerp(8, 6, compactProgress);
+  const fontSize = lerp(12, 10.5, compactProgress);
+  const lineHeight = lerp(20, 16, compactProgress);
 
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        columnGap: 8 * unit,
+        columnGap: gap,
         width,
         height,
         fontFamily: imFont,
@@ -180,52 +226,100 @@ const HeaderRow: React.FC<{ width: number; height: number; type: "project" | "me
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           color: "#1f2329",
-          fontSize: (type === "project" ? 9 : 12) * unit,
-          fontWeight: type === "project" ? 400 : 600,
-          lineHeight: `${18 * unit}px`,
+          fontSize,
+          fontWeight:
+            type === "project"
+              ? localizedFontWeight("label", 400)
+              : localizedFontWeight("heading", 600),
+          lineHeight: `${lineHeight}px`,
         }}
       >
-        {type === "project" ? "Website Revamp Project" : "Messenger"}
+        {type === "project" ? text.websiteRevampProject : text.messenger}
       </p>
     </div>
   );
 };
 
-const Bubble: React.FC<{ children: ReactNode; tone: "gray" | "blue"; unit: number }> = ({ children, tone, unit }) => (
-  <div
-    style={{
-      borderRadius: 6 * unit,
-      background: tone === "gray" ? "#ebeced" : "#ddeaff",
-      padding: `${6 * unit}px ${8 * unit}px`,
-      color: "#1f2329",
-      fontSize: 8 * unit,
-      lineHeight: `${12 * unit}px`,
-      fontFamily: imFont,
-      maxWidth: "100%",
-    }}
-  >
-    {children}
-  </div>
-);
+const Bubble: React.FC<{
+  children: ReactNode;
+  tone: "gray" | "blue";
+  unit: number;
+  morphProgress?: number;
+}> = ({ children, tone, unit, morphProgress = 1 }) => {
+  const radius = lerp(8, 6, morphProgress) * unit;
+  const verticalPadding = lerp(7, 6, morphProgress) * unit;
+  const horizontalPadding = lerp(10, 8, morphProgress) * unit;
+  const fontSize = lerp(10, 8, morphProgress) * unit;
+  const lineHeight = lerp(14, 12, morphProgress) * unit;
 
-const Conversation: React.FC<{ width: number; height: number }> = ({ width, height }) => {
-  const unit = Math.min(width / 186, height / 90);
-  const avatarSize = 22 * unit;
+  return (
+    <div
+      style={{
+        borderRadius: radius,
+        background: tone === "gray" ? "#ebeced" : "#ddeaff",
+        padding: `${verticalPadding}px ${horizontalPadding}px`,
+        color: "#1f2329",
+        fontSize,
+        lineHeight: `${lineHeight}px`,
+        fontFamily: imFont,
+        maxWidth: "100%",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+const Conversation: React.FC<{ width: number; height: number; unitOverride?: number; morphProgress?: number }> = ({
+  width,
+  height,
+  unitOverride,
+  morphProgress,
+}) => {
+  const text = useCopy();
+  const locale = useLocale();
+  const visualMorph = morphProgress ?? 1;
+  const autoUnit = morphProgress === undefined
+    ? Math.min(width / 186, height / 90)
+    : Math.min(width / 218, height / 101);
+  const unit = unitOverride ?? (morphProgress === undefined ? autoUnit : lerp(autoUnit, 1, visualMorph));
+  const avatarSize = lerp(27, 22, visualMorph) * unit;
   const gap = 8 * unit;
+  const conversationGap = lerp(7, 6, visualMorph) * unit;
+  const contentWidth = morphProgress === undefined
+    ? undefined
+    : lerp(182 * unit, Math.max(width - avatarSize - conversationGap, 1), visualMorph);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", rowGap: gap, width, height, overflow: "hidden" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", columnGap: 6 * unit }}>
-        <Avatar src="mqhj7b8u-6u2anoj.png" size={avatarSize} />
-        <div style={{ display: "flex", flexDirection: "column", rowGap: 4 * unit, flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, color: "#8f959e", fontSize: 7 * unit, lineHeight: `${10 * unit}px`, fontFamily: imFont }}>
-            Sean Davis
+      <div style={{ display: "flex", alignItems: "flex-start", columnGap: conversationGap }}>
+        <Img
+          src={staticFile("ui-icons/Sean-avatar.png")}
+          style={{
+            width: avatarSize,
+            height: avatarSize,
+            borderRadius: 999,
+            objectFit: "cover",
+            flexShrink: 0,
+          }}
+        />
+        <div style={{ display: "flex", flexDirection: "column", rowGap: lerp(5, 4, visualMorph) * unit, flex: contentWidth === undefined ? 1 : undefined, width: contentWidth, minWidth: 0 }}>
+          <p style={{ margin: 0, color: "#8f959e", fontSize: lerp(8, 7, visualMorph) * unit, lineHeight: `${lerp(13, 10, visualMorph) * unit}px`, fontFamily: imFont }}>
+            {seanDisplayName}
           </p>
           <div style={{ display: "flex", flexDirection: "column", rowGap: 4 * unit }}>
-            <Bubble tone="gray" unit={unit}>
-              <p style={{ margin: 0 }}>{thaiSeanMessage}</p>
-              <div style={{ height: 1, margin: `${5 * unit}px 0`, background: "#c9cdd4", opacity: 0.9 }} />
-              <p style={{ margin: 0 }}>{englishSeanMessage}</p>
+            <Bubble tone="gray" unit={unit} morphProgress={visualMorph}>
+              <p style={{ margin: 0 }}>
+                <span style={{ color: "#3370ff", whiteSpace: "nowrap" }}>@All&nbsp;</span>
+                {thaiSeanMessage}
+              </p>
+              <div style={{ height: 1, margin: `${lerp(6, 5, visualMorph) * unit}px 0`, background: "#c9cdd4", opacity: 0.9 }} />
+              <p style={{ margin: 0 }}>
+                <span style={{ color: "#3370ff", whiteSpace: "nowrap" }}>
+                  {locale === "zh" ? "@所有人" : "@All"}&nbsp;
+                </span>
+                {text.seanTranslation}
+              </p>
             </Bubble>
           </div>
         </div>
@@ -235,6 +329,7 @@ const Conversation: React.FC<{ width: number; height: number }> = ({ width, heig
 };
 
 const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+  const text = useCopy();
   const unit = Math.min(width / 186, height / 122);
   const avatarSize = 18 * unit;
   const cardWidth = Math.min(144 * unit, Math.max(width - avatarSize - 7 * unit, 1));
@@ -256,7 +351,7 @@ const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, hei
       <div style={{ display: "flex", flexDirection: "column", rowGap: 2.5 * unit, minWidth: 0 }}>
         <div style={{ display: "inline-flex", alignItems: "center", columnGap: 2 * unit }}>
           <p style={{ margin: 0, color: "#8f959e", fontSize: 5.5 * unit, lineHeight: `${8 * unit}px` }}>
-            AI Agent
+            {text.reportSender}
           </p>
         </div>
         <div
@@ -270,7 +365,7 @@ const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, hei
             lineHeight: `${9 * unit}px`,
           }}
         >
-          Your project report is ready to review.
+          {text.reportReady}
         </div>
         <div
           style={{
@@ -288,7 +383,7 @@ const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, hei
           <div style={{ display: "flex", alignItems: "center", columnGap: 3 * unit, height: 10 * unit }}>
             <Img src={staticFile("ui-icons/doc-file-blue.svg")} style={{ width: 10 * unit, height: 10 * unit }} />
             <p style={{ margin: 0, color: "#1f2329", fontSize: 6 * unit, fontWeight: 600, lineHeight: `${9 * unit}px` }}>
-              2026 Q3 Project weekly report
+              {text.reportTitle}
             </p>
           </div>
           <div style={{ position: "relative", width: "100%", height: reportHeight, borderRadius: 3 * unit, overflow: "hidden" }}>
@@ -296,15 +391,15 @@ const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, hei
               src={staticFile("figma/mqgfpq1y-xchj4m9.png")}
               style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.82 }}
             />
-            <p style={{ position: "absolute", top: 5 * unit, left: 5 * unit, width: 44 * unit, margin: 0, color: "#fff", fontSize: 6 * unit, fontWeight: 800, lineHeight: `${8 * unit}px`, textTransform: "uppercase" }}>
-              weekly report
+            <p style={{ position: "absolute", top: 5 * unit, left: 5 * unit, width: 44 * unit, margin: 0, color: "#fff", fontSize: 6 * unit, fontWeight: localizedFontWeight("emphasis", 800), lineHeight: `${8 * unit}px`, textTransform: "uppercase" }}>
+              {text.weeklyReport}
             </p>
-            <p style={{ position: "absolute", right: 5 * unit, bottom: 5 * unit, margin: 0, color: "rgba(255,255,255,0.5)", fontSize: 14 * unit, fontWeight: 800, lineHeight: `${14 * unit}px` }}>
-              2026 Q3
+            <p style={{ position: "absolute", right: 5 * unit, bottom: 5 * unit, margin: 0, color: "rgba(255,255,255,0.5)", fontSize: (text.reportPeriod.length > 8 ? 8 : 14) * unit, fontWeight: localizedFontWeight("emphasis", 800), lineHeight: `${14 * unit}px`, whiteSpace: "nowrap" }}>
+              {text.reportPeriod}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `${Math.max(0.75, unit)}px solid rgba(31,35,41,0.12)`, paddingTop: 3 * unit }}>
-            <span style={{ color: "#1f2329", fontSize: 6 * unit, lineHeight: `${8 * unit}px` }}>You can view</span>
+            <span style={{ color: "#1f2329", fontSize: 6 * unit, lineHeight: `${8 * unit}px` }}>{text.youCanView}</span>
             <span style={{ display: "inline-flex", alignItems: "center", columnGap: 4 * unit }}>
               <Img src={staticFile("ui-icons/external-link.svg")} style={{ width: 8 * unit, height: 8 * unit }} />
               <Img src={staticFile("ui-icons/open-square.svg")} style={{ width: 8 * unit, height: 8 * unit }} />
@@ -317,6 +412,7 @@ const ReportMessage: React.FC<{ width: number; height: number }> = ({ width, hei
 };
 
 const InputBar: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+  const text = useCopy();
   const unit = Math.min(width / 242, height / 30);
   const sendSize = 14 * unit;
 
@@ -337,7 +433,7 @@ const InputBar: React.FC<{ width: number; height: number }> = ({ width, height }
         fontFamily: imFont,
       }}
     >
-      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Send to Website Revamp Project</span>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{text.sendToProject}</span>
       <span
         style={{
           display: "grid",
@@ -353,18 +449,26 @@ const InputBar: React.FC<{ width: number; height: number }> = ({ width, height }
   );
 };
 
-const Sidebar: React.FC<{ width: number; height: number }> = ({ width, height }) => {
-  const unit = Math.min(width / 128, height / 240);
+const Sidebar: React.FC<{
+  width: number;
+  height: number;
+  figmaLayout?: { contentWidth: number; gap: number };
+}> = ({ width, height, figmaLayout }) => {
+  const text = useCopy();
+  const locale = useLocale();
+  const unit = figmaLayout ? 1 : Math.min(width / 128, height / 240);
+  const contentWidth = figmaLayout?.contentWidth ?? Math.max(width - 20 * unit, 1);
+  const contentGap = figmaLayout?.gap ?? 10 * unit;
   const people = [
-    ["mqhj7b8u-s59y9yw.png", "Buckner"],
-    ["mqhj7b8u-zg0whlu.png", "Gera"],
+    ["mqhj7b8u-s59y9yw.png", locale === "zh" ? "Bucker" : "Buckner"],
+    ["mqhj7b8u-zg0whlu.png", locale === "zh" ? "Gora" : "Gera"],
     ["mqhj7b8u-6vu49qd.png", "Alexander"],
   ];
   const feeds = [
-    ["mqhj7b8u-25ecx5z.png", "Website Revamp...", "The project you are res..."],
-    ["mqhj7b8u-5xcu2v9.png", "Approval", "The project you are res..."],
-    ["mqhj7b8u-4wmry9p.png", "Taylor", "We may need to identif..."],
-    ["mqhj7b8u-wta1c2h.png", "Powell", "We may need to identif..."],
+    ["mqhj7b8u-25ecx5z.png", text.websiteRevampShort, text.projectPreview],
+    ["mqhj7b8u-5xcu2v9.png", text.approval, text.projectPreview],
+    ["mqhj7b8u-4wmry9p.png", "Taylor", text.identifyPreview],
+    ["mqhj7b8u-wta1c2h.png", "Powell", text.identifyPreview],
   ];
 
   return (
@@ -372,19 +476,20 @@ const Sidebar: React.FC<{ width: number; height: number }> = ({ width, height })
       style={{
         display: "flex",
         flexDirection: "column",
-        rowGap: 10 * unit,
+        alignItems: "flex-start",
+        rowGap: contentGap,
         width,
         height,
-        padding: `${12 * unit}px ${8 * unit}px ${12 * unit}px ${12 * unit}px`,
-        background: "rgba(255,255,255,0.98)",
-        borderRight: `${Math.max(0.75 * unit, 0.75)}px solid #dee0e3`,
-        borderRadius: `${12 * unit}px 0 0 ${12 * unit}px`,
+        padding: figmaLayout ? 0 : `${12 * unit}px ${8 * unit}px ${12 * unit}px ${12 * unit}px`,
+        background: figmaLayout ? "transparent" : "rgba(255,255,255,0.98)",
+        borderRight: figmaLayout ? "none" : `${Math.max(0.75 * unit, 0.75)}px solid #dee0e3`,
+        borderRadius: figmaLayout ? 0 : `${12 * unit}px 0 0 ${12 * unit}px`,
         boxSizing: "border-box",
         fontFamily: imFont,
       }}
     >
-      <HeaderRow width={width - 20 * unit} height={24 * unit} type="messenger" />
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <HeaderRow width={contentWidth} height={24 * unit} type="messenger" />
+      <div style={{ display: "flex", justifyContent: "space-between", width: contentWidth }}>
         {people.map(([src, label]) => (
           <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", rowGap: 2 * unit }}>
             <Avatar src={src} size={22 * unit} />
@@ -393,10 +498,10 @@ const Sidebar: React.FC<{ width: number; height: number }> = ({ width, height })
         ))}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", rowGap: 2 * unit }}>
           <Img src={staticFile("figma/mqhj7b8u-lcjb03f.png")} style={{ width: 22 * unit, height: 22 * unit, borderRadius: 999 }} />
-          <span style={{ color: "#646a73", fontSize: 6 * unit, lineHeight: `${8 * unit}px` }}>Show</span>
+          <span style={{ color: "#646a73", fontSize: 6 * unit, lineHeight: `${8 * unit}px` }}>{text.showMore}</span>
         </div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", rowGap: 1 * unit, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", rowGap: 1 * unit, width: contentWidth, overflow: "hidden" }}>
         {feeds.map(([src, name, preview]) => (
           <div key={name} style={{ display: "flex", alignItems: "center", columnGap: 6 * unit, padding: `${6 * unit}px ${2 * unit}px`, minHeight: 36 * unit }}>
             <Avatar src={src} size={24 * unit} />
@@ -417,8 +522,15 @@ const Panel: React.FC<{ rect: Rect; children: ReactNode }> = ({ rect, children }
   </div>
 );
 
-const MessengerContent: React.FC<{ frame: number; width: number; height: number }> = ({ frame, width, height }) => {
+const MessengerContent: React.FC<{
+  frame: number;
+  width: number;
+  height: number;
+  wide: boolean;
+}> = ({ frame, width, height, wide }) => {
   const { from, to, progress, stage1Opacity } = getImState(frame);
+  const designs = wide ? wideDesigns : defaultDesigns;
+  const rects = wide ? wideRects : defaultRects;
   const designWidth = lerp(designs[from].width, designs[to].width, progress);
   const designHeight = lerp(designs[from].height, designs[to].height, progress);
   const availableWidth = Math.max(width - contentPadding * 2, 1);
@@ -436,6 +548,175 @@ const MessengerContent: React.FC<{ frame: number; width: number; height: number 
   const stage1ConversationBridgeOpacity = 1 - stage1ConversationHandoffProgress;
   const stage2ConversationOpacity = stage1To2Progress > 0 ? stage1ConversationHandoffProgress : 1;
   const reportProgress = getStage4ReportProgress(frame);
+  const wideSidebarGap = from === "stage2"
+    ? lerp(8, to === "stage3" ? 6 : 8, progress)
+    : 6;
+  const wideSidebarContentWidth = from === "stage2"
+    ? lerp(141, to === "stage3" ? 142 : 141, progress)
+    : 142;
+
+  const sidebarSurface = (
+    <div style={{ position: "absolute", inset: 0 }}>
+      <Panel rect={sidebarRect}>
+        <Sidebar
+          width={sidebarRect.width}
+          height={sidebarRect.height}
+          figmaLayout={wide ? { contentWidth: wideSidebarContentWidth, gap: wideSidebarGap } : undefined}
+        />
+      </Panel>
+    </div>
+  );
+
+  const mainSurface = (
+    <div style={{ position: "absolute", inset: 0 }}>
+      <Panel rect={mainRect}>
+        <div
+          style={{
+            width: mainRect.width,
+            height: mainRect.height,
+            borderRadius: sidebarRect.opacity > 0.05 ? `0 ${12 * Math.min(mainRect.width / 199, mainRect.height / 240)}px ${12 * Math.min(mainRect.width / 199, mainRect.height / 240)}px 0` : 12,
+            background: "#fff",
+          }}
+        />
+      </Panel>
+      <Panel rect={projectHeaderRect}>
+        <HeaderRow width={projectHeaderRect.width} height={projectHeaderRect.height} type="project" />
+      </Panel>
+      <Panel rect={messengerHeaderRect}>
+        <HeaderRow width={messengerHeaderRect.width} height={messengerHeaderRect.height} type="messenger" />
+      </Panel>
+        <Panel rect={messagesRect}>
+          <div style={{ position: "relative", width: messagesRect.width, height: messagesRect.height }}>
+          {!wide ? (
+            <div style={{ position: "absolute", inset: 0, opacity: (1 - reportProgress) * stage2ConversationOpacity }}>
+              <Conversation width={messagesRect.width} height={messagesRect.height} />
+            </div>
+          ) : null}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: reportProgress,
+              transform: `translateY(${(1 - reportProgress) * 4}px)`,
+            }}
+          >
+            <ReportMessage width={messagesRect.width} height={messagesRect.height} />
+          </div>
+        </div>
+      </Panel>
+      <Panel rect={inputRect}>
+        <InputBar width={inputRect.width} height={inputRect.height} />
+      </Panel>
+    </div>
+  );
+
+  const desktopSurface = (
+    <div style={{ position: "absolute", inset: 0 }}>
+      {sidebarSurface}
+      {mainSurface}
+    </div>
+  );
+
+  if (wide) {
+    const mainReveal = smoothRatio(stage1To2Progress, 0.16, 0.66);
+    const sidebarReveal = smoothRatio(stage1To2Progress, 0.46, 0.9);
+    const mobileShellExit = smoothRatio(stage1To2Progress, 0.08, 0.58);
+    const conversationMorph = smoothRatio(stage1To2Progress, 0.08, 0.78);
+    const mobileDesignScale = Math.min((width - 2) / 252, (height - 2) / 498);
+    const mobileDesignX = (width - 2 - 252 * mobileDesignScale) / 2;
+    const mobileDesignY = (height - 2 - 498 * mobileDesignScale) / 2;
+    const isStage1 = stage1To2Progress === 0;
+    const mobileConversationRect: Rect = {
+      x: mobileDesignX + 18 * mobileDesignScale,
+      y: mobileDesignY + 281 * mobileDesignScale,
+      width: 218 * mobileDesignScale,
+      height: 101 * mobileDesignScale,
+      opacity: 1,
+    };
+    const sharedConversationRect = mixRect(
+      mobileConversationRect,
+      { ...messagesRect, opacity: 1 },
+      conversationMorph,
+    );
+    const revealedMainWidth = mainRect.width * mainReveal;
+    const mainClipHeight = Math.min(
+      height - mainRect.y,
+      mainRect.height + 4 * inputRect.opacity,
+    );
+    const revealedSidebarWidth = sidebarRect.width * sidebarReveal;
+
+    return (
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+        <div
+          style={{
+            position: "absolute",
+            left: mainRect.x,
+            top: mainRect.y,
+            width: revealedMainWidth,
+            height: mainClipHeight,
+            overflow: "hidden",
+            borderRadius: 12,
+          }}
+        >
+          <div style={{ position: "absolute", left: -mainRect.x, top: -mainRect.y, width, height }}>
+            {mainSurface}
+          </div>
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            left: sidebarRect.x,
+            top: sidebarRect.y,
+            width: revealedSidebarWidth,
+            height: sidebarRect.height,
+            overflow: "hidden",
+            borderRadius: 12,
+          }}
+        >
+          <div style={{ position: "absolute", left: -sidebarRect.x, top: -sidebarRect.y, width, height }}>
+            {sidebarSurface}
+          </div>
+        </div>
+        {mobileShellExit < 0.999 ? (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              clipPath: `inset(0 0 ${mobileShellExit * 100}% 0 round ${22 * (1 - mobileShellExit)}px)`,
+              transform: `translateY(${-6 * mobileShellExit}px)`,
+            }}
+          >
+            <ScaledDesign designWidth={252} designHeight={498} layoutWidth={width} layoutHeight={height}>
+              <ImResultView
+                progress={1}
+                frame={frame}
+                conversationState="animated"
+                conversationMode={isStage1 ? "all" : "withoutConversation"}
+              />
+            </ScaledDesign>
+          </div>
+        ) : null}
+        {!isStage1 ? (
+          <div
+            style={{
+              position: "absolute",
+              left: sharedConversationRect.x,
+              top: sharedConversationRect.y,
+              width: sharedConversationRect.width,
+              height: sharedConversationRect.height,
+              opacity: 1 - reportProgress,
+            }}
+          >
+            <Conversation
+              width={sharedConversationRect.width}
+              height={sharedConversationRect.height}
+              morphProgress={conversationMorph}
+            />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
@@ -462,45 +743,7 @@ const MessengerContent: React.FC<{ frame: number; width: number; height: number 
         </div>
       ) : null}
       <div style={{ position: "absolute", inset: 0, opacity: messengerOpacity }}>
-        <Panel rect={sidebarRect}>
-          <Sidebar width={sidebarRect.width} height={sidebarRect.height} />
-        </Panel>
-        <Panel rect={mainRect}>
-          <div
-            style={{
-              width: mainRect.width,
-              height: mainRect.height,
-              borderRadius: sidebarRect.opacity > 0.05 ? `0 ${12 * Math.min(mainRect.width / 199, mainRect.height / 240)}px ${12 * Math.min(mainRect.width / 199, mainRect.height / 240)}px 0` : 12,
-              background: "#fff",
-            }}
-          />
-        </Panel>
-        <Panel rect={projectHeaderRect}>
-          <HeaderRow width={projectHeaderRect.width} height={projectHeaderRect.height} type="project" />
-        </Panel>
-        <Panel rect={messengerHeaderRect}>
-          <HeaderRow width={messengerHeaderRect.width} height={messengerHeaderRect.height} type="messenger" />
-        </Panel>
-        <Panel rect={messagesRect}>
-          <div style={{ position: "relative", width: messagesRect.width, height: messagesRect.height }}>
-            <div style={{ position: "absolute", inset: 0, opacity: (1 - reportProgress) * stage2ConversationOpacity }}>
-              <Conversation width={messagesRect.width} height={messagesRect.height} />
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: reportProgress,
-                transform: `translateY(${(1 - reportProgress) * 4}px)`,
-              }}
-            >
-              <ReportMessage width={messagesRect.width} height={messagesRect.height} />
-            </div>
-          </div>
-        </Panel>
-        <Panel rect={inputRect}>
-          <InputBar width={inputRect.width} height={inputRect.height} />
-        </Panel>
+        {desktopSurface}
       </div>
     </div>
   );
@@ -508,8 +751,9 @@ const MessengerContent: React.FC<{ frame: number; width: number; height: number 
 
 export const ImContainer = () => {
   const frame = useCurrentFrame();
+  const layoutVariant = useLayoutVariant();
   const layout = useContainerLayout("im");
-  const adaptiveLayout = getStage4AdaptiveImLayout(layout, frame);
+  const adaptiveLayout = getStage4AdaptiveImLayout(layout, frame, layoutVariant === "wide");
   const contentWidth = Math.max(adaptiveLayout.width, 1);
   const contentHeight = Math.max(adaptiveLayout.height, 1);
   const stage1PhoneOpacity = 1 - getStage1To2MorphProgress(frame);
@@ -519,7 +763,12 @@ export const ImContainer = () => {
     <>
       <PhoneFrameBackdrop layout={adaptiveLayout} opacity={stage1PhoneOpacity} borderRadius={borderRadius} />
       <UIContainer layout={adaptiveLayout} borderRadius={borderRadius}>
-        <MessengerContent frame={frame} width={contentWidth} height={contentHeight} />
+        <MessengerContent
+          frame={frame}
+          width={contentWidth}
+          height={contentHeight}
+          wide={layoutVariant === "wide"}
+        />
       </UIContainer>
     </>
   );

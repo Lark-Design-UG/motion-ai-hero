@@ -1,3 +1,9 @@
+import {
+  createContext,
+  createElement,
+  type ReactNode,
+  useContext,
+} from "react";
 import { Easing, useCurrentFrame } from "remotion";
 
 export type ContainerId =
@@ -31,6 +37,25 @@ export type ContainerLayout = ContainerStageConfig & {
 
 type StageLayouts = Record<StageId, Record<ContainerId, ContainerStageConfig>>;
 type StageLayoutOverrides = Partial<Record<ContainerId, Partial<ContainerStageConfig>>>;
+
+export type LayoutVariant = "default" | "wide";
+
+type CanvasMetrics = {
+  width: number;
+  height: number;
+  exitMargin: number;
+};
+
+const LayoutVariantContext = createContext<LayoutVariant>("default");
+
+export const LayoutVariantProvider: React.FC<{
+  variant?: LayoutVariant;
+  children: ReactNode;
+}> = ({ variant = "default", children }) => {
+  return createElement(LayoutVariantContext.Provider, { value: variant }, children);
+};
+
+export const useLayoutVariant = () => useContext(LayoutVariantContext);
 
 const stageIds: StageId[] = ["stage1", "stage2", "stage3", "stage4", "stage5", "stage6"];
 
@@ -95,6 +120,8 @@ export const totalDurationInFrames = stageFrames.stage6 + stagePauseFrames.stage
 export const stage4To5ContentDelayFrames = 16;
 export const stage4To5InputDelayFrames = 28;
 export const stage2To3InputPressDelayFrames = 0;
+const wideStage5To6DashboardDelayFrames = 8;
+const wideStage5To6DashboardSlideX = 80;
 
 const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
 
@@ -216,6 +243,141 @@ export const stageLayouts: StageLayouts = {
   stage6: stage6Layout,
 };
 
+const wideLegacyOffset = { x: 84, y: -51.5 };
+
+const offsetStageLayout = (
+  layout: Record<ContainerId, ContainerStageConfig>,
+): Record<ContainerId, ContainerStageConfig> => {
+  return Object.fromEntries(
+    (Object.keys(layout) as ContainerId[]).map((id) => [
+      id,
+      {
+        ...layout[id],
+        x: layout[id].x + wideLegacyOffset.x,
+        y: layout[id].y + wideLegacyOffset.y,
+      },
+    ]),
+  ) as Record<ContainerId, ContainerStageConfig>;
+};
+
+const wideStage2Layout = createStageLayout({
+  reminder: { x: 716.5, y: 24, width: 267.5, height: 136, scale: 1, opacity: 1, transformOrigin: "top right" },
+  dashboard: { x: 24, y: 24, width: 267.5, height: 196, scale: 1, opacity: 1, transformOrigin: "top left" },
+  gantt: { x: 24, y: 236, width: 267.5, height: 261, scale: 1, opacity: 1, transformOrigin: "bottom left" },
+  doc: { x: 527.5, y: 273, width: 173, height: 224, scale: 1, opacity: 1, transformOrigin: "bottom right" },
+  input: { x: 482, y: 252.382, width: 44, height: 12, scale: 0.92, opacity: 0, zIndex: 100 },
+  workflow: { x: 307.5, y: 273, width: 204, height: 224, scale: 1, opacity: 1, transformOrigin: "bottom left" },
+  flow: { x: 24, y: 540, width: 276, height: 201, scale: 1, opacity: 1 },
+  im: { x: 307.5, y: 24, width: 393, height: 233, scale: 1, opacity: 1, transformOrigin: "top center" },
+  task: { x: 716.5, y: 176, width: 267.5, height: 321, scale: 1, opacity: 1, transformOrigin: "bottom right" },
+});
+
+const wideStage3Layout = createStageLayout({
+  reminder: { x: 744, y: 24, width: 240, height: 136, scale: 1, opacity: 1, transformOrigin: "top right" },
+  dashboard: { x: 24, y: 24, width: 240, height: 196, scale: 1, opacity: 1, transformOrigin: "top left" },
+  gantt: { x: 24, y: 236, width: 240, height: 261, scale: 1, opacity: 1, transformOrigin: "bottom left" },
+  doc: { x: 512, y: 306.7652893066406, width: 216, height: 190.23471069335938, scale: 1, opacity: 1, transformOrigin: "bottom right" },
+  input: { x: 280, y: 194, width: 448, height: 96.765, scale: 1, opacity: 1, zIndex: 100 },
+  workflow: { x: 280, y: 306.7652893066406, width: 216, height: 190.23471069335938, scale: 1, opacity: 1, transformOrigin: "bottom left" },
+  flow: { x: 24, y: 540, width: 276, height: 201, scale: 1, opacity: 1 },
+  im: { x: 280, y: 24, width: 448, height: 154, scale: 1, opacity: 1, transformOrigin: "top center" },
+  task: { x: 744, y: 176, width: 240, height: 321, scale: 1, opacity: 1, transformOrigin: "bottom right" },
+});
+
+const wideStage4Layout = createStageLayout({
+  reminder: { x: 614, y: 20, width: 165, height: 105, scale: 1, opacity: 1, borderRadius: 8 },
+  dashboard: { x: 56, y: 32, width: 165, height: 132, scale: 1, opacity: 1, borderRadius: 8 },
+  gantt: { x: -14, y: 231, width: 171.691, height: 145.755, scale: 1, opacity: 1, borderRadius: 8 },
+  doc: { x: 743, y: 453, width: 179.25, height: 105.67, scale: 1, opacity: 1, borderRadius: 8 },
+  input: { x: 338.98, y: 169, width: 329, height: 90.137, scale: 1, opacity: 1, zIndex: 100, borderRadius: 12 },
+  workflow: { x: 397, y: 342, width: 208.805, height: 154.25, scale: 1, opacity: 1, borderRadius: 8 },
+  flow: { x: 101, y: 467, width: 207, height: 151, scale: 1, opacity: 1, borderRadius: 8 },
+  im: { x: 278, y: -24, width: 204, height: 124, scale: 1, opacity: 1, zIndex: 2, borderRadius: 12 },
+  task: { x: 813, y: 221, width: 181.394, height: 155.347, scale: 1, opacity: 1, borderRadius: 8 },
+});
+
+const wideStage5Base = offsetStageLayout(stage5Layout);
+const wideStage5Layout: Record<ContainerId, ContainerStageConfig> = {
+  ...wideStage5Base,
+  input: {
+    ...wideStage5Base.input,
+    y: 50.5,
+    scale: 1.06,
+  },
+  task: {
+    ...wideStage5Base.task,
+    x: 154.5 + wideStage5To6DashboardSlideX,
+    y: 57.1,
+    width: 790.483,
+    height: 395.477,
+    borderRadius: 12.562,
+  },
+};
+
+const wideStage1Base = offsetStageLayout(stage1Layout);
+const wideStage1Layout: Record<ContainerId, ContainerStageConfig> = {
+  ...wideStage1Base,
+  im: {
+    ...wideStage1Base.im,
+    x: 63.98,
+    y: 121.33,
+    width: 180.298,
+    height: 342.567,
+    borderRadius: 21.329,
+  },
+  task: {
+    ...wideStage1Base.task,
+    x: 154.5,
+    y: 57.1,
+    width: 790.483,
+    height: 395.477,
+    borderRadius: 12.562,
+  },
+};
+
+const wideStage6Base = offsetStageLayout(stage6Layout);
+const wideStage6Layout: Record<ContainerId, ContainerStageConfig> = {
+  ...wideStage6Base,
+  input: {
+    ...wideStage6Base.input,
+    x: 63.98,
+    y: 121.33,
+    width: 180.298,
+    height: 342.567,
+    borderRadius: 21.329,
+  },
+  task: {
+    ...wideStage6Base.task,
+    x: 154.5,
+    y: 57.1,
+    width: 790.483,
+    height: 395.477,
+    borderRadius: 12.562,
+  },
+};
+
+const wideStageLayouts: StageLayouts = {
+  stage1: wideStage1Layout,
+  stage2: wideStage2Layout,
+  stage3: wideStage3Layout,
+  stage4: wideStage4Layout,
+  stage5: wideStage5Layout,
+  stage6: wideStage6Layout,
+};
+
+const canvasMetricsByVariant: Record<LayoutVariant, CanvasMetrics> = {
+  default: { width: 840, height: 623, exitMargin: 16 },
+  wide: { width: 1008, height: 521, exitMargin: 16 },
+};
+
+const getStageLayouts = (variant: LayoutVariant) => {
+  return variant === "wide" ? wideStageLayouts : stageLayouts;
+};
+
+export const getLegacyCanvasOffset = (variant: LayoutVariant) => {
+  return variant === "wide" ? wideLegacyOffset : { x: 0, y: 0 };
+};
+
 const timelineFrames = stageIds.map((stageId) => stageFrames[stageId]);
 
 const moveEase = Easing.bezier(0.4, 0, 0.2, 1);
@@ -224,8 +386,6 @@ const opacityEase = Easing.bezier(0.33, 1, 0.68, 1);
 const scaleEase = Easing.bezier(0.4, 0, 0.2, 1);
 const stage1To2Ease = Easing.bezier(0.42, 0, 0.58, 1);
 const stage3To4Ease = Easing.bezier(0.4, 0, 0.2, 1);
-const canvasCenter = { x: 420, y: 312 };
-const canvasBounds = { width: 840, height: 623, exitMargin: 16 };
 const stage4FloatAmplitude = 6.2;
 const stage4FloatPeriodFrames = 96;
 
@@ -382,7 +542,14 @@ const getCenterInterpolatedPosition = (
   };
 };
 
-const getFlyOutLayout = (layout: ContainerStageConfig): ContainerStageConfig => {
+const getFlyOutLayout = (
+  layout: ContainerStageConfig,
+  canvasBounds: CanvasMetrics,
+): ContainerStageConfig => {
+  const canvasCenter = {
+    x: canvasBounds.width / 2,
+    y: canvasBounds.height / 2,
+  };
   const centerX = layout.x + layout.width / 2;
   const centerY = layout.y + layout.height / 2;
   const directionX = centerX - canvasCenter.x;
@@ -410,38 +577,55 @@ const getFlyOutLayout = (layout: ContainerStageConfig): ContainerStageConfig => 
   };
 };
 
-export const getLayoutAtFrame = (id: ContainerId, frame: number): ContainerLayout => {
+export const getLayoutAtFrame = (
+  id: ContainerId,
+  frame: number,
+  variant: LayoutVariant = "default",
+): ContainerLayout => {
+  const layouts = getStageLayouts(variant);
+  const canvasBounds = canvasMetricsByVariant[variant];
   const { fromStage, toStage, progress } = getStageSegment(frame);
-  const fromLayout = stageLayouts[fromStage][id];
+  const fromLayout = layouts[fromStage][id];
   const isStage1To2 = fromStage === "stage1" && toStage === "stage2";
   const isStage4To5 = fromStage === "stage4" && toStage === "stage5";
   const isStage5To6 = fromStage === "stage5" && toStage === "stage6";
   const isStage2To3 = fromStage === "stage2" && toStage === "stage3";
   const isStage3To4 = fromStage === "stage3" && toStage === "stage4";
+  const isWideStage5To6Dashboard = variant === "wide" && isStage5To6 && id === "task";
   const shouldFlyOut = isStage4To5 && id !== "input";
   const shouldCenterResize = (isStage4To5 || isStage5To6) && id === "input";
-  const shouldAnchorResize = fromStage === "stage2" && toStage === "stage3";
-  const toLayout = shouldFlyOut ? getFlyOutLayout(fromLayout) : stageLayouts[toStage][id];
+  const shouldAnchorResize =
+    variant === "default" && fromStage === "stage2" && toStage === "stage3";
+  const toLayout = shouldFlyOut
+    ? getFlyOutLayout(fromLayout, canvasBounds)
+    : layouts[toStage][id];
   const stage4To5DelayFrames = id === "input" ? stage4To5InputDelayFrames : stage4To5ContentDelayFrames;
   const stage4To5ContentDelayRatio = clamp(stage4To5DelayFrames / getStageTransitionDuration("stage4"));
   const stage2To3InputPressDelayRatio = clamp(
     stage2To3InputPressDelayFrames / getStageTransitionDuration("stage2"),
+  );
+  const stage5To6DashboardDelayRatio = clamp(
+    wideStage5To6DashboardDelayFrames / getStageTransitionDuration("stage5"),
   );
   const animationProgress = isStage4To5
     ? remapProgress(progress, stage4To5ContentDelayRatio, 1)
     : isStage1To2
       ? stage1To2Ease(progress)
       : isStage2To3
-      ? remapProgress(progress, stage2To3InputPressDelayRatio, 1)
-    : progress;
+        ? remapProgress(progress, stage2To3InputPressDelayRatio, 1)
+        : isWideStage5To6Dashboard
+          ? remapProgress(progress, stage5To6DashboardDelayRatio, 1)
+          : progress;
   const stage3To4Progress = stage3To4Ease(animationProgress);
   const moveProgress = isStage3To4 ? stage3To4Progress : moveEase(animationProgress);
   const sizeProgress = isStage3To4 ? stage3To4Progress : sizeEase(remapProgress(animationProgress, 0.06, 1));
-  const opacityProgress = shouldFlyOut
-    ? opacityEase(remapProgress(animationProgress, 0.1, 0.75))
-    : isStage3To4
-      ? stage3To4Progress
-      : opacityEase(remapProgress(animationProgress, 0, 0.55));
+  const opacityProgress = isWideStage5To6Dashboard
+    ? opacityEase(animationProgress)
+    : shouldFlyOut
+      ? opacityEase(remapProgress(animationProgress, 0.1, 0.75))
+      : isStage3To4
+        ? stage3To4Progress
+        : opacityEase(remapProgress(animationProgress, 0, 0.55));
   const scaleProgress = isStage3To4 ? stage3To4Progress : remapProgress(animationProgress, 0.02, 0.92);
   const baseScale = isStage3To4
     ? lerp(fromLayout.scale, toLayout.scale, scaleProgress)
@@ -451,7 +635,7 @@ export const getLayoutAtFrame = (id: ContainerId, frame: number): ContainerLayou
       scaleProgress,
       scaleEase,
     );
-  const overshoot = isStage3To4
+  const overshoot = isStage3To4 || isWideStage5To6Dashboard
     ? 0
     : Math.sin(Math.PI * animationProgress) * 0.018 * getMotionIntensity(fromLayout, toLayout);
   const width = lerp(fromLayout.width, toLayout.width, sizeProgress);
@@ -497,6 +681,7 @@ export const getLayoutAtFrame = (id: ContainerId, frame: number): ContainerLayou
 
 export const useContainerLayout = (id: ContainerId): ContainerLayout => {
   const frame = useCurrentFrame();
+  const variant = useLayoutVariant();
 
-  return getLayoutAtFrame(id, frame);
+  return getLayoutAtFrame(id, frame, variant);
 };
