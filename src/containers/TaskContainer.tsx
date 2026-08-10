@@ -1,5 +1,7 @@
 import { Easing, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { CSSProperties, ReactNode } from "react";
+import { useCopy, useLocale } from "../localization";
+import { localizedFontWeight } from "../typography";
 import {
   getStage1To2MorphProgress,
   getStage2To3MorphProgress,
@@ -8,6 +10,7 @@ import {
   getStageTransitionDuration,
   stageFrames,
   useContainerLayout,
+  useLayoutVariant,
 } from "./layout";
 import { UIContainer } from "./UIContainer";
 
@@ -23,6 +26,7 @@ type Rect = {
 };
 
 type TaskVariant = "large" | "medium" | "compact";
+type TaskRectKey = "metrics" | "status" | "progress" | "trend" | "assignment" | "priority";
 
 const smoothProgress = (frame: number, start: number, duration: number) => {
   return Easing.bezier(0.16, 1, 0.3, 1)(clamp((frame - start) / duration));
@@ -45,9 +49,16 @@ const getRectStyle = (rect: Rect): CSSProperties => ({
   opacity: rect.opacity,
 });
 
-const mapRectToContent = (rect: Rect, designWidth: number, designHeight: number, availableWidth: number, availableHeight: number): Rect => ({
-  x: contentPadding + (rect.x / designWidth) * availableWidth,
-  y: contentPadding + (rect.y / designHeight) * availableHeight,
+const mapRectToContent = (
+  rect: Rect,
+  designWidth: number,
+  designHeight: number,
+  availableWidth: number,
+  availableHeight: number,
+  padding = contentPadding,
+): Rect => ({
+  x: padding + (rect.x / designWidth) * availableWidth,
+  y: padding + (rect.y / designHeight) * availableHeight,
   width: (rect.width / designWidth) * availableWidth,
   height: (rect.height / designHeight) * availableHeight,
   opacity: rect.opacity,
@@ -71,31 +82,62 @@ const getTaskMetricValues = (progress: number) => ({
   completedValue: Math.round(lerp(TASK_METRIC_COMPLETED_START, TASK_METRIC_COMPLETED_STAGE4, progress)),
 });
 
-const designs: Record<TaskVariant, { width: number; height: number }> = {
+const defaultDesigns: Record<TaskVariant, { width: number; height: number }> = {
   large: { width: 643, height: 450 },
   medium: { width: 316, height: 483 },
   compact: { width: 316, height: 254 },
 };
 
-const rects: Record<TaskVariant, Record<"metrics" | "status" | "progress" | "trend", Rect>> = {
+const defaultRects: Record<TaskVariant, Record<TaskRectKey, Rect>> = {
   large: {
     metrics: { x: 0, y: 36, width: 316, height: 218, opacity: 1 },
     status: { x: 327, y: 36, width: 316, height: 218, opacity: 1 },
     progress: { x: 0, y: 267, width: 316, height: 183, opacity: 1 },
     trend: { x: 327, y: 267, width: 316, height: 183, opacity: 1 },
+    assignment: { x: 654, y: 36, width: 316, height: 218, opacity: 0 },
+    priority: { x: 654, y: 267, width: 316, height: 183, opacity: 0 },
   },
   medium: {
     metrics: { x: 0, y: 36, width: 316, height: 218, opacity: 1 },
     status: { x: 0, y: 266, width: 316, height: 218, opacity: 1 },
     progress: { x: 0, y: 495, width: 316, height: 183, opacity: 0 },
     trend: { x: 0, y: 690, width: 316, height: 183, opacity: 0 },
+    assignment: { x: 0, y: 885, width: 316, height: 218, opacity: 0 },
+    priority: { x: 0, y: 1115, width: 316, height: 183, opacity: 0 },
   },
   compact: {
     metrics: { x: 0, y: 36, width: 316, height: 218, opacity: 1 },
     status: { x: 0, y: 266, width: 316, height: 218, opacity: 0 },
     progress: { x: 0, y: 495, width: 316, height: 183, opacity: 0 },
     trend: { x: 0, y: 690, width: 316, height: 183, opacity: 0 },
+    assignment: { x: 0, y: 885, width: 316, height: 218, opacity: 0 },
+    priority: { x: 0, y: 1115, width: 316, height: 183, opacity: 0 },
   },
+};
+
+const wideDesigns: Record<TaskVariant, { width: number; height: number }> = {
+  large: { width: 790.483, height: 395.477 },
+  medium: defaultDesigns.medium,
+  compact: defaultDesigns.compact,
+};
+
+const wideRects: Record<TaskVariant, Record<TaskRectKey, Rect>> = {
+  large: {
+    metrics: { x: 11.735, y: 30.205, width: 250.734, height: 173.204, opacity: 1 },
+    status: { x: 270.717, y: 30.205, width: 250.734, height: 173.204, opacity: 1 },
+    assignment: { x: 529.699, y: 30.205, width: 250.734, height: 173.204, opacity: 1 },
+    progress: { x: 11.735, y: 211.657, width: 250.734, height: 173.204, opacity: 1 },
+    trend: { x: 270.717, y: 211.657, width: 250.734, height: 173.204, opacity: 1 },
+    priority: { x: 529.699, y: 211.657, width: 250.734, height: 173.204, opacity: 1 },
+  },
+  medium: defaultRects.medium,
+  compact: defaultRects.compact,
+};
+
+const wideTitleRects: Record<TaskVariant, Rect> = {
+  large: { x: 11.735, y: 5.766, width: 220, height: 24, opacity: 1 },
+  medium: { x: 0, y: 0, width: 220, height: 24, opacity: 1 },
+  compact: { x: 0, y: 0, width: 220, height: 24, opacity: 1 },
 };
 
 const getTaskState = (frame: number) => {
@@ -120,11 +162,13 @@ const getTaskState = (frame: number) => {
 };
 
 const TitleRow: React.FC<{ width?: number; height?: number }> = ({ width = 220, height = 24 }) => {
-  const unit = Math.min(width / 160, height / 24);
-  const iconSize = 24 * unit;
-  const gap = 8 * unit;
+  const text = useCopy();
+  const compactProgress = clamp((24 - height) / 6);
+  const iconSize = height;
+  const gap = lerp(8, 6, compactProgress);
   const textWidth = Math.max(width - iconSize - gap, 1);
-  const fontSize = Math.min(14 * unit, textWidth / 8.8);
+  const fontSize = Math.min(lerp(12, 10.5, compactProgress), textWidth / 8.8);
+  const lineHeight = lerp(20, 16, compactProgress);
 
   return (
   <div
@@ -139,8 +183,8 @@ const TitleRow: React.FC<{ width?: number; height?: number }> = ({ width = 220, 
       height,
       color: "#373c43",
       fontSize,
-      fontWeight: 700,
-      lineHeight: `${Math.max(18 * unit, fontSize * 1.35)}px`,
+      fontWeight: localizedFontWeight("heading", 700),
+      lineHeight: `${lineHeight}px`,
       overflow: "hidden",
     }}
   >
@@ -150,15 +194,15 @@ const TitleRow: React.FC<{ width?: number; height?: number }> = ({ width = 220, 
         placeItems: "center",
         width: iconSize,
         height: iconSize,
-        borderRadius: 7 * unit,
+        borderRadius: lerp(7, 5, compactProgress),
         background: "#f2f3fd",
         flexShrink: 0,
       }}
     >
-      <Img src={staticFile("ui-icons/task-dashboard-timer.svg")} style={{ width: 14 * unit, height: 14 * unit }} />
+      <Img src={staticFile("ui-icons/task-dashboard-timer.svg")} style={{ width: lerp(14, 10, compactProgress), height: lerp(14, 10, compactProgress) }} />
     </span>
     <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-      Project Dashboard
+      {text.projectDashboard}
     </span>
   </div>
   );
@@ -182,15 +226,15 @@ const MetricCard: React.FC<{ label: string; value: number; width: number; height
       overflow: "hidden",
     }}
   >
-    <p style={{ margin: 0, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${27 * unit}px` }}>{label}</p>
-    <p style={{ margin: 0, color: "#1f2329", fontSize: 35 * unit, fontWeight: 800, lineHeight: `${35 * unit}px` }}>
+    <p style={{ margin: 0, color: "#1f2329", fontSize: 15 * unit, fontWeight: localizedFontWeight("label", 400), lineHeight: `${27 * unit}px` }}>{label}</p>
+    <p style={{ margin: 0, color: "#1f2329", fontSize: 35 * unit, fontWeight: localizedFontWeight("emphasis", 800), lineHeight: `${35 * unit}px` }}>
       {value}
     </p>
   </div>
   );
 };
 
-const getCountdownItems = (frame: number, fps: number) => {
+const getCountdownValues = (frame: number, fps: number) => {
   const startTotalSeconds = (((12 * 24 + 3) * 60 + 59) * 60) + 24;
   const effectiveElapsedSeconds =
     frame >= taskResetFrame
@@ -204,19 +248,19 @@ const getCountdownItems = (frame: number, fps: number) => {
   const pad = (value: number) => String(value).padStart(2, "0");
 
   return [
-    [pad(days), "DAYS"],
-    [pad(hours), "HOURS"],
-    [pad(minutes), "MINUTES"],
-    [pad(seconds), "SECONDS"],
+    pad(days),
+    pad(hours),
+    pad(minutes),
+    pad(seconds),
   ];
 };
 
 const Countdown: React.FC<{ width: number; height: number }> = ({ width, height }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const items = [
-    ...getCountdownItems(frame, fps),
-  ];
+  const text = useCopy();
+  const values = getCountdownValues(frame, fps);
+  const labels = [text.days, text.hours, text.minutes, text.seconds];
   const unit = Math.min(width / 316, height / 104);
   const boxSize = 42 * unit;
   const itemWidth = 45 * unit;
@@ -226,20 +270,23 @@ const Countdown: React.FC<{ width: number; height: number }> = ({ width, height 
       style={{
         ...cardStyle,
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "center",
         columnGap: 11 * unit,
         width,
         height,
-        padding: `${22 * unit}px ${16 * unit}px`,
+        padding: `0 ${16 * unit}px`,
         boxSizing: "border-box",
         borderRadius: 10 * unit,
       }}
     >
-      {items.map(([value, label], index) => (
+      {values.map((value, index) => {
+        const label = labels[index];
+
+        return (
         <div key={label} style={{ display: "flex", alignItems: "flex-start", columnGap: 11 * unit }}>
           {index > 0 ? (
-            <span style={{ color: "#336df4", fontSize: 18 * unit, fontWeight: 800, lineHeight: `${45 * unit}px` }}>
+            <span style={{ color: "#336df4", fontSize: 18 * unit, fontWeight: localizedFontWeight("heading", 800), lineHeight: `${45 * unit}px` }}>
               :
             </span>
           ) : null}
@@ -254,23 +301,25 @@ const Countdown: React.FC<{ width: number; height: number }> = ({ width, height 
                 background: "#336df4",
                 color: "#fff",
                 fontSize: 23 * unit,
-                fontWeight: 700,
-                lineHeight: `${44 * unit}px`,
+                fontWeight: localizedFontWeight("emphasis", 700),
+                lineHeight: 1,
               }}
             >
               {value}
             </div>
-            <span style={{ color: "rgba(77,82,114,0.9)", fontSize: 9 * unit, fontWeight: 600, letterSpacing: 0.36 * unit }}>
+            <span style={{ color: "rgba(77,82,114,0.9)", fontSize: 9 * unit, fontWeight: localizedFontWeight("label", 600), letterSpacing: 0.36 * unit, lineHeight: `${12 * unit}px` }}>
               {label}
             </span>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
 
 const MetricAndCountdown: React.FC<{ width: number; height: number; progress: number }> = ({ width, height, progress }) => {
+  const text = useCopy();
   const gap = Math.max(Math.min(width, height) * 0.032, 4);
   const metricHeight = Math.max((height - gap) * (104 / 218), 1);
   const metricWidth = Math.max((width - gap) / 2, 1);
@@ -280,8 +329,8 @@ const MetricAndCountdown: React.FC<{ width: number; height: number; progress: nu
   return (
   <div style={{ display: "flex", flexDirection: "column", rowGap: gap, width, height }}>
     <div style={{ display: "flex", columnGap: gap, height: metricHeight }}>
-      <MetricCard label="Goal" value={goalValue} width={metricWidth} height={metricHeight} />
-      <MetricCard label="Completed" value={completedValue} width={metricWidth} height={metricHeight} />
+      <MetricCard label={text.goal} value={goalValue} width={metricWidth} height={metricHeight} />
+      <MetricCard label={text.completed} value={completedValue} width={metricWidth} height={metricHeight} />
     </div>
     <Countdown width={width} height={countdownHeight} />
   </div>
@@ -289,11 +338,12 @@ const MetricAndCountdown: React.FC<{ width: number; height: number; progress: nu
 };
 
 const DonutChart: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+  const text = useCopy();
   const legend = [
-    ["#3b73f6", "On going"],
-    ["#00339e", "Completed"],
-    ["#31c9ba", "Stalled"],
-    ["#82a6ff", "Not yet started"],
+    ["#3b73f6", text.ongoing],
+    ["#00339e", text.completed],
+    ["#31c9ba", text.stalled],
+    ["#82a6ff", text.notYetStarted],
   ];
   const unit = Math.min(width / 316, height / 218);
   const padding = 16 * unit;
@@ -316,8 +366,8 @@ const DonutChart: React.FC<{ width: number; height: number }> = ({ width, height
         borderRadius: 10 * unit,
       }}
     >
-      <p style={{ position: "absolute", top: padding, left: padding, margin: 0, color: "#1f2329", fontSize: titleSize, lineHeight: `${27 * unit}px` }}>
-        Task by status
+      <p style={{ position: "absolute", top: padding, left: padding, margin: 0, color: "#1f2329", fontSize: titleSize, fontWeight: localizedFontWeight("heading", 400), lineHeight: `${27 * unit}px` }}>
+        {text.taskByStatus}
       </p>
       <svg width={chartSize} height={chartSize} viewBox="0 0 120 120" style={{ marginTop: 26 * unit }}>
         <circle cx="60" cy="60" r="42" fill="none" stroke="#3b73f6" strokeWidth="26" strokeDasharray="92 264" transform="rotate(-90 60 60)" />
@@ -343,6 +393,7 @@ const ProgressCard: React.FC<{ width: number; height: number; goalValue: number;
   goalValue,
   completedValue,
 }) => {
+  const text = useCopy();
   const unit = Math.min(width / 316, height / 183);
   const innerWidth = Math.max(width - 32 * unit, 1);
   const progressRatio = goalValue > 0 ? completedValue / goalValue : 0;
@@ -355,7 +406,6 @@ const ProgressCard: React.FC<{ width: number; height: number; goalValue: number;
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      justifyContent: "space-between",
       width,
       height,
       padding: 16 * unit,
@@ -363,27 +413,33 @@ const ProgressCard: React.FC<{ width: number; height: number; goalValue: number;
       borderRadius: 10 * unit,
     }}
   >
-    <p style={{ alignSelf: "stretch", margin: 0, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${27 * unit}px` }}>Overall progress</p>
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", rowGap: 10 * unit, width: innerWidth }}>
-      <p style={{ margin: 0, color: "#1f2329", fontSize: 32 * unit, fontWeight: 800, lineHeight: `${32 * unit}px` }}>{progressPercent}%</p>
-      <div style={{ width: innerWidth, height: 14 * unit, borderRadius: 4 * unit, background: "#f4f6f9", overflow: "hidden" }}>
-        <div style={{ width: innerWidth * progressRatio, height: "100%", borderRadius: 4 * unit, background: "#4294ff" }} />
+    <p style={{ alignSelf: "stretch", margin: 0, color: "#1f2329", fontSize: 15 * unit, fontWeight: localizedFontWeight("heading", 400), lineHeight: `${27 * unit}px` }}>{text.overallProgress}</p>
+    <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", width: innerWidth }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", rowGap: 10 * unit, width: innerWidth }}>
+        <p style={{ margin: 0, color: "#1f2329", fontSize: 32 * unit, fontWeight: localizedFontWeight("emphasis", 800), lineHeight: `${32 * unit}px` }}>{progressPercent}%</p>
+        <div style={{ width: innerWidth, height: 14 * unit, borderRadius: 4 * unit, background: "#f4f6f9", overflow: "hidden" }}>
+          <div style={{ width: innerWidth * progressRatio, height: "100%", borderRadius: 4 * unit, background: "#4294ff" }} />
+        </div>
+        <p style={{ margin: 0, opacity: 0.4, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${25 * unit}px` }}>
+          {`${text.current} ${completedValue} | ${text.goal} ${goalValue}`}
+        </p>
       </div>
-      <p style={{ margin: 0, opacity: 0.4, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${25 * unit}px` }}>
-        {`Current ${completedValue} | Goal ${goalValue}`}
-      </p>
     </div>
   </div>
   );
 };
 
 const TrendCard: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+  const text = useCopy();
+  const locale = useLocale();
   const unit = Math.min(width / 316, height / 183);
   const innerWidth = Math.max(width - 32 * unit, 1);
   const titleHeight = 28 * unit;
   const chartHeight = Math.max(height - 16 * unit * 2 - titleHeight - 20 * unit - 27 * unit, 1);
   const monthGap = 25 * unit;
-  const monthWidths = [29, 25, 21, 28, 27].map((monthWidth) => monthWidth * unit);
+  const monthWidths = (locale === "zh" ? [32, 32, 32, 32, 32] : [29, 25, 21, 28, 27]).map(
+    (monthWidth) => monthWidth * unit,
+  );
 
   return (
   <div
@@ -399,14 +455,14 @@ const TrendCard: React.FC<{ width: number; height: number }> = ({ width, height 
       borderRadius: 10 * unit,
     }}
   >
-    <p style={{ margin: 0, color: "#1f2329", fontSize: 15 * unit, lineHeight: `${27 * unit}px` }}>Task completion trend</p>
+    <p style={{ margin: 0, color: "#1f2329", fontSize: 15 * unit, fontWeight: localizedFontWeight("heading", 400), lineHeight: `${27 * unit}px` }}>{text.taskCompletionTrend}</p>
     <div style={{ display: "flex", flexDirection: "column", rowGap: 10 * unit, width: innerWidth }}>
       <Img
         src={staticFile("ui-icons/task-completion-trend-line.svg")}
         style={{ width: innerWidth, height: chartHeight, objectFit: "fill" }}
       />
       <div style={{ display: "flex", alignItems: "flex-start", columnGap: monthGap, width: innerWidth, overflow: "hidden" }}>
-        {["May", "Jun", "Jul", "Aug", "Sep"].map((month, index) => (
+        {text.months.map((month, index) => (
           <span
             key={month}
             style={{
@@ -416,6 +472,7 @@ const TrendCard: React.FC<{ width: number; height: number }> = ({ width, height 
               fontSize: 15 * unit,
               lineHeight: `${25 * unit}px`,
               textAlign: "center",
+              whiteSpace: "nowrap",
             }}
           >
             {month}
@@ -427,6 +484,113 @@ const TrendCard: React.FC<{ width: number; height: number }> = ({ width, height 
   );
 };
 
+const ProjectAssignmentCard: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+  const text = useCopy();
+  const unit = Math.min(width / 250.734, height / 173.204);
+  const names = ["Stella", "Alex", "Kimi", "Roger"];
+  const barHeights = [74, 36, 45, 89];
+  const chartBottom = 139 * unit;
+
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        position: "relative",
+        width,
+        height,
+        borderRadius: 8 * unit,
+        overflow: "hidden",
+      }}
+    >
+      <p style={{ position: "absolute", left: 17 * unit, top: 8 * unit, margin: 0, color: "#1f2329", fontSize: 11.5 * unit, lineHeight: `${21.5 * unit}px` }}>
+        {text.projectAssignment}
+      </p>
+      <div style={{ position: "absolute", left: 18 * unit, right: 18 * unit, top: chartBottom, height: 1, background: "rgba(31,35,41,0.1)" }} />
+      {names.map((name, index) => {
+        const x = (30 + index * 51) * unit;
+        const barHeight = barHeights[index] * unit;
+
+        return (
+          <div key={name}>
+            <div
+              style={{
+                position: "absolute",
+                left: x,
+                top: chartBottom - barHeight,
+                width: 20 * unit,
+                height: barHeight,
+                borderRadius: `${2 * unit}px ${2 * unit}px 0 0`,
+                background: "#3975ee",
+              }}
+            />
+            <span
+              style={{
+                position: "absolute",
+                left: x - 8 * unit,
+                top: 143 * unit,
+                width: 36 * unit,
+                color: "rgba(31,35,41,0.4)",
+                fontSize: 11.5 * unit,
+                lineHeight: `${19 * unit}px`,
+                textAlign: "center",
+              }}
+            >
+              {name}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const PriorityCard: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+  const text = useCopy();
+  const unit = Math.min(width / 250.734, height / 173.204);
+  const legend = [
+    ["#5682f7", text.normal],
+    ["#1559e8", text.important],
+    ["#38bcea", text.urgent],
+  ] as const;
+
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        position: "relative",
+        width,
+        height,
+        borderRadius: 8 * unit,
+        overflow: "hidden",
+      }}
+    >
+      <p style={{ position: "absolute", left: 17 * unit, top: 8 * unit, margin: 0, color: "#1f2329", fontSize: 11.5 * unit, lineHeight: `${21.5 * unit}px` }}>
+        {text.taskByPriority}
+      </p>
+      <div
+        style={{
+          position: "absolute",
+          left: 34 * unit,
+          top: 52 * unit,
+          width: 94 * unit,
+          height: 94 * unit,
+          borderRadius: 999,
+          background: "conic-gradient(#5682f7 0deg 180deg, #1559e8 180deg 270deg, #38bcea 270deg 360deg)",
+          transform: "rotate(0deg)",
+        }}
+      />
+      <div style={{ position: "absolute", left: 146 * unit, top: 62 * unit, display: "flex", flexDirection: "column", rowGap: 6 * unit }}>
+        {legend.map(([color, label]) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", columnGap: 6 * unit }}>
+            <span style={{ width: 7 * unit, height: 7 * unit, borderRadius: 999, background: color, flexShrink: 0 }} />
+            <span style={{ color: "#646a73", fontSize: 10.7 * unit, lineHeight: `${18 * unit}px`, whiteSpace: "nowrap" }}>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const LayoutItem: React.FC<{
   rect: Rect;
   children: ReactNode;
@@ -434,21 +598,63 @@ const LayoutItem: React.FC<{
   <div style={getRectStyle(rect)}>{children}</div>
 );
 
-const DashboardContent: React.FC<{ frame: number; width: number; height: number }> = ({ frame, width, height }) => {
+const DashboardContent: React.FC<{ frame: number; width: number; height: number; wide: boolean }> = ({ frame, width, height, wide }) => {
   const { from, to, progress } = getTaskState(frame);
+  const designs = wide ? wideDesigns : defaultDesigns;
+  const rects = wide ? wideRects : defaultRects;
   const stage4Progress = getStage4StateChangeProgress(frame);
   const metricProgress = frame >= taskResetFrame ? 0 : stage4Progress;
   const { goalValue, completedValue } = getTaskMetricValues(metricProgress);
   const designWidth = lerp(designs[from].width, designs[to].width, progress);
   const designHeight = lerp(designs[from].height, designs[to].height, progress);
-  const availableWidth = Math.max(width - contentPadding * 2, 1);
-  const availableHeight = Math.max(height - contentPadding * 2, 1);
-  const titleWidth = (220 / designWidth) * availableWidth;
-  const titleHeight = (24 / designHeight) * availableHeight;
-  const metricsRect = mapRectToContent(mixRect(rects[from].metrics, rects[to].metrics, progress), designWidth, designHeight, availableWidth, availableHeight);
-  const statusRect = mapRectToContent(mixRect(rects[from].status, rects[to].status, progress), designWidth, designHeight, availableWidth, availableHeight);
-  const progressRect = mapRectToContent(mixRect(rects[from].progress, rects[to].progress, progress), designWidth, designHeight, availableWidth, availableHeight);
-  const trendRect = mapRectToContent(mixRect(rects[from].trend, rects[to].trend, progress), designWidth, designHeight, availableWidth, availableHeight);
+  const largePresence = from === "large"
+    ? to === "large" ? 1 : 1 - progress
+    : 0;
+  const padding = wide ? lerp(contentPadding, 0, largePresence) : contentPadding;
+  const availableWidth = Math.max(width - padding * 2, 1);
+  const availableHeight = Math.max(height - padding * 2, 1);
+  const mapTaskRect = (key: TaskRectKey) => mapRectToContent(
+    mixRect(rects[from][key], rects[to][key], progress),
+    designWidth,
+    designHeight,
+    availableWidth,
+    availableHeight,
+    padding,
+  );
+  const metricsRect = mapTaskRect("metrics");
+  const statusRect = mapTaskRect("status");
+  const progressRect = mapTaskRect("progress");
+  const trendRect = mapTaskRect("trend");
+  const assignmentRect = mapTaskRect("assignment");
+  const priorityRect = mapTaskRect("priority");
+  const mappedTitleRect = wide
+    ? mapRectToContent(
+      mixRect(wideTitleRects[from], wideTitleRects[to], progress),
+      designWidth,
+      designHeight,
+      availableWidth,
+      availableHeight,
+      padding,
+    )
+    : {
+      x: contentPadding,
+      y: contentPadding,
+      width: (220 / designWidth) * availableWidth,
+      height: (24 / designHeight) * availableHeight,
+      opacity: 1,
+    };
+  const compactHeaderProgress = to === "compact" ? progress : 0;
+  const sharedHeaderInset = lerp(10, 9, compactHeaderProgress);
+  const sharedHeaderRect: Rect = {
+    x: sharedHeaderInset,
+    y: sharedHeaderInset,
+    width: Math.max(width - sharedHeaderInset * 2, 1),
+    height: lerp(24, 18, compactHeaderProgress),
+    opacity: 1,
+  };
+  const titleRect = wide
+    ? mixRect(mappedTitleRect, sharedHeaderRect, 1 - largePresence)
+    : mappedTitleRect;
 
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
@@ -458,8 +664,8 @@ const DashboardContent: React.FC<{ frame: number; width: number; height: number 
           inset: 0,
         }}
       >
-        <div style={{ position: "absolute", left: contentPadding, top: contentPadding, width: titleWidth, height: titleHeight }}>
-          <TitleRow width={titleWidth} height={titleHeight} />
+        <div style={getRectStyle(titleRect)}>
+          <TitleRow width={titleRect.width} height={titleRect.height} />
         </div>
         <LayoutItem rect={metricsRect}>
           <MetricAndCountdown width={metricsRect.width} height={metricsRect.height} progress={metricProgress} />
@@ -478,6 +684,12 @@ const DashboardContent: React.FC<{ frame: number; width: number; height: number 
         <LayoutItem rect={trendRect}>
           <TrendCard width={trendRect.width} height={trendRect.height} />
         </LayoutItem>
+        <LayoutItem rect={assignmentRect}>
+          <ProjectAssignmentCard width={assignmentRect.width} height={assignmentRect.height} />
+        </LayoutItem>
+        <LayoutItem rect={priorityRect}>
+          <PriorityCard width={priorityRect.width} height={priorityRect.height} />
+        </LayoutItem>
       </div>
     </div>
   );
@@ -486,12 +698,13 @@ const DashboardContent: React.FC<{ frame: number; width: number; height: number 
 export const TaskContainer = () => {
   const frame = useCurrentFrame();
   const layout = useContainerLayout("task");
+  const layoutVariant = useLayoutVariant();
   const contentWidth = Math.max(layout.width, 1);
   const contentHeight = Math.max(layout.height, 1);
 
   return (
     <UIContainer layout={layout} background="rgba(255, 255, 255, 0.78)" backdropFilter="blur(22px)">
-      <DashboardContent frame={frame} width={contentWidth} height={contentHeight} />
+      <DashboardContent frame={frame} width={contentWidth} height={contentHeight} wide={layoutVariant === "wide"} />
     </UIContainer>
   );
 };

@@ -1,11 +1,12 @@
 import { Img, staticFile, useCurrentFrame } from "remotion";
-import { getStage4SweepStart, stageFrames } from "./layout";
+import { useCopy } from "../localization";
+import { localizedFontWeight } from "../typography";
+import { getStage3To4MorphProgress, getStage4SweepStart, stageFrames } from "./layout";
 import { useContainerLayout } from "./layout";
 import { getStage2GrowStyle, getStage2WidthGrowStyle } from "./stage2Grow";
 import { UIContainer } from "./UIContainer";
 
-const fontFamily =
-  '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
+const fontFamily = "var(--localized-ui-font)";
 
 export const ganttStage2GrowStartFrame = stageFrames.stage1 + 12;
 export const ganttStage2GrowDurationFrames = 60;
@@ -56,16 +57,24 @@ const CheckboxMark: React.FC<{ checkedProgress: number; size: number; unit: numb
 );
 
 const GanttContent: React.FC<{ width: number; height: number; frame: number }> = ({ width, height, frame }) => {
+  const text = useCopy();
   const unit = Math.min(width / 259, height / 237);
+  const compactProgress = getStage3To4MorphProgress(frame);
   const padding = 11 * unit;
   const rowGap = Math.max(9 * unit, 4);
   const checkboxSize = 14 * unit;
+  const headerIconSize = 24 - 6 * compactProgress;
+  const headerGap = 8 - 2 * compactProgress;
+  const headerHeight = 24 - 6 * compactProgress;
+  const headerFontSize = 12 - 1.5 * compactProgress;
+  const headerLineHeight = 20 - 4 * compactProgress;
   const stateStart = getStage4SweepStart() + 20;
   const completionProgresses = [
     1,
     smoothProgress(frame, stateStart, 18),
     smoothProgress(frame, stateStart + 8, 18),
     smoothProgress(frame, stateStart + 16, 18),
+    smoothProgress(frame, stateStart + 24, 18),
   ];
 
   return (
@@ -88,15 +97,16 @@ const GanttContent: React.FC<{ width: number; height: number; frame: number }> =
         style={{
           display: "flex",
           alignItems: "center",
-          columnGap: 8 * unit,
-          height: 24 * unit,
+          columnGap: headerGap,
+          height: headerHeight,
+          flexShrink: 0,
           ...getStage2GrowStyle(frame, 0, { origin: "left center", ...ganttStage2GrowTiming }),
         }}
       >
-        <Img src={staticFile("ui-icons/gantt-tasks-check.svg")} style={{ width: 24 * unit, height: 24 * unit }} />
-        <p style={{ margin: 0, color: "#1f2329", fontSize: 12 * unit, fontWeight: 700, lineHeight: `${20 * unit}px` }}>Tasks</p>
+        <Img src={staticFile("ui-icons/gantt-tasks-check.svg")} style={{ width: headerIconSize, height: headerIconSize }} />
+        <p style={{ margin: 0, color: "#1f2329", fontSize: headerFontSize, fontWeight: localizedFontWeight("heading", 700), lineHeight: `${headerLineHeight}px` }}>{text.tasks}</p>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, rowGap, minHeight: 0 }}>
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div
           style={{
             boxSizing: "border-box",
@@ -120,7 +130,7 @@ const GanttContent: React.FC<{ width: number; height: number; frame: number }> =
                 lineHeight: `${18 * unit}px`,
               }}
             >
-              Provide copywriting for the new product page
+              {text.copywritingTask}
             </p>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "inline-flex", alignItems: "center", columnGap: 5 * unit, borderRadius: 12 * unit, background: "#f0f4ff", padding: `${3 * unit}px ${7 * unit}px ${3 * unit}px ${3 * unit}px` }}>
@@ -134,31 +144,47 @@ const GanttContent: React.FC<{ width: number; height: number; frame: number }> =
             </div>
           </div>
         </div>
-        {[0, 1, 2].map((index) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              columnGap: 9 * unit,
-              padding: `0 ${7 * unit}px`,
-              height: 20 * unit,
-              ...getStage2GrowStyle(frame, 2 + index, { origin: "left center", translateY: 4 * unit, ...ganttStage2GrowTiming }),
-            }}
-          >
-            <CheckboxMark checkedProgress={completionProgresses[index + 1]} size={checkboxSize} unit={unit} />
-            <div style={{ display: "flex", alignItems: "center", columnGap: 8 * unit, flex: 1, minWidth: 0 }}>
-              <div style={getStage2WidthGrowStyle(frame, 5 + index * 2, ganttStage2GrowTiming)}>
-                <SkeletonLine width={[67, 56, 184][index] * unit} height={(index === 1 ? 11 : 10) * unit} />
-              </div>
-              {index < 2 ? (
-                <div style={getStage2WidthGrowStyle(frame, 6 + index * 2, ganttStage2GrowTiming)}>
-                  <SkeletonLine width={[122, 91][index] * unit} height={10 * unit} />
+        {[
+          { left: 67, right: 122 },
+          { left: 86, right: 91 },
+          { left: 56, right: 91 },
+          { left: 184, right: 0 },
+        ].map((row, index) => {
+          const rowPresence = index < 2 ? 1 : 1 - compactProgress;
+          const growStyle = getStage2GrowStyle(frame, 2 + index, { origin: "left center", translateY: 4 * unit, ...ganttStage2GrowTiming });
+          const growOpacity = typeof growStyle.opacity === "number" ? growStyle.opacity : 1;
+
+          return (
+            <div
+              key={index}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                columnGap: 9 * unit,
+                boxSizing: "border-box",
+                height: 20 * unit * rowPresence,
+                marginTop: rowGap * rowPresence,
+                padding: `0 ${7 * unit}px`,
+                overflow: "hidden",
+                opacity: growOpacity * rowPresence,
+                transform: growStyle.transform,
+                transformOrigin: growStyle.transformOrigin,
+              }}
+            >
+              <CheckboxMark checkedProgress={completionProgresses[index + 1]} size={checkboxSize} unit={unit} />
+              <div style={{ display: "flex", alignItems: "center", columnGap: 8 * unit, flex: 1, minWidth: 0 }}>
+                <div style={getStage2WidthGrowStyle(frame, 5 + index * 2, ganttStage2GrowTiming)}>
+                  <SkeletonLine width={row.left * unit} height={10 * unit} />
                 </div>
-              ) : null}
+                {row.right > 0 ? (
+                  <div style={getStage2WidthGrowStyle(frame, 6 + index * 2, ganttStage2GrowTiming)}>
+                    <SkeletonLine width={row.right * unit} height={10 * unit} />
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

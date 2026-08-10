@@ -9,11 +9,13 @@ import {
   getStageTransitionDuration,
   stage4To5ContentDelayFrames,
   stageFrames,
+  useLayoutVariant,
 } from "./containers/layout";
 import { getStage4Border } from "./containers/UIContainer";
 import { SHOW_GRADIENT_ENDPOINT_MARKERS } from "./debug";
+import { useCopy } from "./localization";
 
-const lineColor = "#94b4ff";
+const lineColor = "#b8ccfb";
 
 const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
 
@@ -156,6 +158,19 @@ const getFloatOffset = (seed: string, frame: number, presence: number) => {
   };
 };
 
+const getLinkedNodeFloatOffset = (
+  lineIds: readonly string[],
+  frame: number,
+  presence: number,
+) => {
+  const offsets = lineIds.map((lineId) => getFloatOffset(lineId, frame, presence));
+
+  return {
+    floatX: offsets.reduce((sum, offset) => sum + offset.floatX, 0) / offsets.length,
+    floatY: offsets.reduce((sum, offset) => sum + offset.floatY, 0) / offsets.length,
+  };
+};
+
 const networkEllipses = [
   {
     id: "network-line-1",
@@ -203,6 +218,58 @@ const networkEllipses = [
     startAngle: 40,
   }, // 中间的长线
 ] as const;
+
+const wideNetworkScale = 1.057;
+const wideNetworkOffset = { x: 84, y: -51.5 };
+const wideNetworkEllipses = networkEllipses.map((ellipse) => {
+  const radiusGrowthX = ellipse.rx * (wideNetworkScale - 1);
+  const radiusGrowthY = ellipse.ry * (wideNetworkScale - 1);
+  const anchorCompensation = ellipse.id === "network-line-1"
+    ? { x: radiusGrowthX, y: 0 }
+    : ellipse.id === "network-line-2"
+      ? { x: 0, y: -radiusGrowthY }
+      : ellipse.id === "network-line-3"
+        ? { x: 0, y: radiusGrowthY }
+        : ellipse.id === "network-line-4"
+          ? { x: -radiusGrowthX, y: 0 }
+          : { x: 0, y: 59.5 };
+
+  return {
+    ...ellipse,
+    cx: ellipse.cx + wideNetworkOffset.x + anchorCompensation.x,
+    cy: ellipse.cy + wideNetworkOffset.y + anchorCompensation.y,
+    rx: ellipse.rx * wideNetworkScale,
+    ry: ellipse.ry * wideNetworkScale,
+  };
+});
+
+const networkNodePositions = {
+  default: {
+    assistant: { x: 760, y: 98 },
+    teammate: { x: 188, y: 181 },
+    cli: { x: 610, y: 332 },
+    agent: { x: 128, y: 423 },
+    star: { x: 602, y: 229 },
+    organization: { x: 176, y: 324 },
+  },
+  wide: {
+    assistant: { x: 865, y: 40 },
+    teammate: { x: 273, y: 134 },
+    cli: { x: 693, y: 274 },
+    agent: { x: 215, y: 365 },
+    star: { x: 684, y: 179 },
+    organization: { x: 263, y: 267 },
+  },
+} as const;
+
+const networkNodeLineLinks = {
+  assistant: ["network-line-2"],
+  teammate: ["network-line-2", "network-line-4"],
+  cli: ["network-line-1", "network-line-5"],
+  agent: ["network-line-3", "network-line-4"],
+  star: ["network-line-1", "network-line-2"],
+  organization: ["network-line-4", "network-line-5"],
+} as const;
 
 const stage4NodeBorder = getStage4Border(1, 0.75);
 
@@ -483,6 +550,13 @@ const NetworkEllipse: React.FC<{
 
 export const Stage4NetworkBackground = () => {
   const frame = useCurrentFrame();
+  const text = useCopy();
+  const layoutVariant = useLayoutVariant();
+  const wide = layoutVariant === "wide";
+  const ellipses = wide ? wideNetworkEllipses : networkEllipses;
+  const nodePositions = networkNodePositions[layoutVariant];
+  const canvasWidth = wide ? 1008 : 840;
+  const canvasHeight = wide ? 521 : 623;
   const nodeProgress = Math.min(
     getStage4EnterProgress(frame),
     getStage4ExitProgress(frame),
@@ -504,16 +578,16 @@ export const Stage4NetworkBackground = () => {
       }}
     >
       <svg
-        width="840"
-        height="623"
-        viewBox="0 0 840 623"
+        width={canvasWidth}
+        height={canvasHeight}
+        viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
         style={{
           position: "absolute",
           inset: 0,
           overflow: "hidden",
         }}
       >
-        {networkEllipses.map((ellipse) => (
+        {ellipses.map((ellipse) => (
           <NetworkEllipse
             key={ellipse.id}
             {...ellipse}
@@ -525,51 +599,51 @@ export const Stage4NetworkBackground = () => {
       </svg>
 
       <ProfileNode
-        label="AI Assistant"
+        label={text.aiAssistant}
         image="mqf7oyhy-kwtl8yr.png"
-        x={760}
-        y={98}
+        x={nodePositions.assistant.x}
+        y={nodePositions.assistant.y}
         progress={nodeProgress}
-        {...getFloatOffset("ai-assistant", frame, nodeProgress)}
+        {...getLinkedNodeFloatOffset(networkNodeLineLinks.assistant, frame, nodeProgress)}
       />
       <ProfileNode
-        label="AI Teammate"
+        label={text.aiTeammate}
         image="mqf7oyhy-uetrmy7.png"
-        x={188}
-        y={181}
+        x={nodePositions.teammate.x}
+        y={nodePositions.teammate.y}
         progress={nodeProgress}
-        {...getFloatOffset("ai-teammate", frame, nodeProgress)}
+        {...getLinkedNodeFloatOffset(networkNodeLineLinks.teammate, frame, nodeProgress)}
       />
       <ProfileNode
         label="Lark CLI"
         image="mqf7oyhw-pw7e9i7.svg"
-        x={610}
-        y={332}
+        x={nodePositions.cli.x}
+        y={nodePositions.cli.y}
         progress={nodeProgress}
-        {...getFloatOffset("lark-cli", frame, nodeProgress)}
+        {...getLinkedNodeFloatOffset(networkNodeLineLinks.cli, frame, nodeProgress)}
       />
       <ProfileNode
-        label="AI Agent"
+        label={text.aiAgent}
         image="mqf7oyhy-m66inwq.png"
-        x={128}
-        y={423}
+        x={nodePositions.agent.x}
+        y={nodePositions.agent.y}
         progress={nodeProgress}
-        {...getFloatOffset("ai-agent", frame, nodeProgress)}
+        {...getLinkedNodeFloatOffset(networkNodeLineLinks.agent, frame, nodeProgress)}
       />
 
       <SmallIconNode
-        x={602}
-        y={229}
+        x={nodePositions.star.x}
+        y={nodePositions.star.y}
         image="mqf7oyhw-wgyco03.svg"
         progress={nodeProgress}
-        {...getFloatOffset("star-icon", frame, nodeProgress)}
+        {...getLinkedNodeFloatOffset(networkNodeLineLinks.star, frame, nodeProgress)}
       />
       <SmallIconNode
-        x={176}
-        y={324}
+        x={nodePositions.organization.x}
+        y={nodePositions.organization.y}
         iconSrc={NETWORK_CENTER_HUB_ICON}
         progress={nodeProgress}
-        {...getFloatOffset("org-icon", frame, nodeProgress)}
+        {...getLinkedNodeFloatOffset(networkNodeLineLinks.organization, frame, nodeProgress)}
       />
     </AbsoluteFill>
   );

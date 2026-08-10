@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Img, staticFile, useCurrentFrame } from "remotion";
+import { useCopy } from "../localization";
+import { localizedFontWeight } from "../typography";
 import {
   getStage4VisualStart,
   getStage4StateChangeProgress,
@@ -11,8 +13,7 @@ import { useContainerLayout } from "./layout";
 import { getStage2GrowStyle, getStage2WidthGrowStyle } from "./stage2Grow";
 import { UIContainer } from "./UIContainer";
 
-const fontFamily =
-  '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
+const fontFamily = "var(--localized-ui-font)";
 
 export const docStage2GrowStartFrame = stageFrames.stage1 + 6;
 export const docStage2GrowDurationFrames = 50;
@@ -24,13 +25,8 @@ const docStage2GrowTiming = {
   staggerFrames: docStage2GrowStaggerFrames,
 };
 
-const DOC_COVER_DESIGN_WIDTH = 188;
-const DOC_COVER_DESIGN_HEIGHT = 75;
-
-const getDocCoverHeight = (bodyWidth: number) =>
-  bodyWidth * (DOC_COVER_DESIGN_HEIGHT / DOC_COVER_DESIGN_WIDTH);
-
 const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
+const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;
 const smoothProgress = (frame: number, start: number, duration: number) => {
   const progress = clamp((frame - start) / duration);
 
@@ -49,30 +45,43 @@ const Line: React.FC<{ width: number; height: number }> = ({ width, height }) =>
   />
 );
 
-const SpaceIcon: React.FC<{ unit: number }> = ({ unit }) => (
-  <Img src={staticFile("ui-icons/doc-file-blue.svg")} style={{ width: 18 * unit, height: 18 * unit, flexShrink: 0 }} />
+const SpaceIcon: React.FC<{ size: number }> = ({ size }) => (
+  <Img src={staticFile("ui-icons/doc-file-blue.svg")} style={{ width: size, height: size, flexShrink: 0 }} />
 );
 
-const DocHeader: React.FC<{ unit: number }> = ({ unit }) => (
-  <div style={{ display: "inline-flex", alignItems: "center", columnGap: 6 * unit, height: 18 * unit, flexShrink: 0 }}>
-    <SpaceIcon unit={unit} />
-    <p
-      style={{
-        margin: 0,
-        color: "#1f2329",
-        fontSize: 11 * unit,
-        fontWeight: 700,
-        lineHeight: `${16 * unit}px`,
-        fontFamily,
-      }}
-    >
-      Docs
-    </p>
-  </div>
-);
+const DocHeader: React.FC<{
+  iconSize: number;
+  gap: number;
+  height: number;
+  fontSize: number;
+  lineHeight: number;
+}> = ({ iconSize, gap, height, fontSize, lineHeight }) => {
+  const text = useCopy();
 
-const DocCoverState: React.FC<{ unit: number; width: number; height: number; opacity: number }> = ({ unit, width, height, opacity }) => (
-  <div
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", columnGap: gap, height, flexShrink: 0 }}>
+      <SpaceIcon size={iconSize} />
+      <p
+        style={{
+          margin: 0,
+          color: "#1f2329",
+          fontSize,
+          fontWeight: localizedFontWeight("heading", 700),
+          lineHeight: `${lineHeight}px`,
+          fontFamily,
+        }}
+      >
+        {text.docs}
+      </p>
+    </div>
+  );
+};
+
+const DocCoverState: React.FC<{ unit: number; width: number; height: number; opacity: number }> = ({ unit, width, height, opacity }) => {
+  const text = useCopy();
+
+  return (
+    <div
     style={{
       position: "absolute",
       left: 0,
@@ -103,7 +112,7 @@ const DocCoverState: React.FC<{ unit: number; width: number; height: number; opa
         fontFamily,
       }}
     >
-      weekly report
+      {text.weeklyReport}
     </p>
     <p
       style={{
@@ -113,17 +122,18 @@ const DocCoverState: React.FC<{ unit: number; width: number; height: number; opa
         width: 86 * unit,
         margin: 0,
         color: "rgba(255,255,255,0.4)",
-        fontSize: 19 * unit,
+        fontSize: (text.reportPeriod.length > 8 ? 12 : 19) * unit,
         fontWeight: 700,
         lineHeight: `${14 * unit}px`,
         textTransform: "uppercase",
         fontFamily,
       }}
     >
-      2026 Q3
+      {text.reportPeriod}
     </p>
-  </div>
-);
+    </div>
+  );
+};
 
 const DefaultCoverState: React.FC<{
   unit: number;
@@ -137,8 +147,11 @@ const DefaultCoverState: React.FC<{
   height,
   opacity,
   compact = false,
-}) => (
-  <div
+}) => {
+  const text = useCopy();
+
+  return (
+    <div
     style={{
       position: "absolute",
       left: 0,
@@ -163,13 +176,13 @@ const DefaultCoverState: React.FC<{
         margin: 0,
         color: "#fff",
         fontSize: (compact ? 9 : 11) * unit,
-        fontWeight: 800,
+        fontWeight: localizedFontWeight("emphasis", 800),
         lineHeight: `${(compact ? 11 : 14) * unit}px`,
         textTransform: "uppercase",
         fontFamily,
       }}
     >
-      weekly report
+      {text.weeklyReport}
     </p>
     <p
       style={{
@@ -181,18 +194,22 @@ const DefaultCoverState: React.FC<{
         width: compact ? 86 * unit : undefined,
         margin: 0,
         color: compact ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.82)",
-        fontSize: (compact ? 19 : 24) * unit,
-        fontWeight: 800,
+        fontSize: (text.reportPeriod.length > 8 ? (compact ? 12 : 16) : (compact ? 19 : 24)) * unit,
+        fontWeight: localizedFontWeight("emphasis", 800),
         lineHeight: `${(compact ? 14 : 24) * unit}px`,
       }}
     >
-      2026 Q3
+      {text.reportPeriod}
     </p>
-  </div>
-);
+    </div>
+  );
+};
 
-const GeneratedDocText: React.FC<{ unit: number; progress: number }> = ({ unit, progress }) => (
-  <div style={{ display: "flex", flexDirection: "column", rowGap: 6 * unit, width: "100%", opacity: progress }}>
+const GeneratedDocText: React.FC<{ unit: number; progress: number }> = ({ unit, progress }) => {
+  const text = useCopy();
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", rowGap: 6 * unit, width: "100%", opacity: progress }}>
     <div style={{ display: "flex", alignItems: "flex-start", columnGap: 5 * unit, paddingLeft: 3 * unit }}>
       <div style={{ width: 3 * unit, height: 3 * unit, marginTop: 5 * unit, borderRadius: 999, background: "#5b65f5", flexShrink: 0 }} />
       <p
@@ -205,7 +222,7 @@ const GeneratedDocText: React.FC<{ unit: number; progress: number }> = ({ unit, 
           fontFamily,
         }}
       >
-        Site setup, staffing, and launch prep are progressing as scheduled. No major issues flagged this week.
+        {text.generatedSummary}
       </p>
     </div>
     <div style={{ display: "flex", alignItems: "flex-start", columnGap: 5 * unit, paddingLeft: 3 * unit }}>
@@ -221,13 +238,13 @@ const GeneratedDocText: React.FC<{ unit: number; progress: number }> = ({ unit, 
         }}
       />
     </div>
-  </div>
-);
+    </div>
+  );
+};
 
-const Stage4DocBody: React.FC<{ width: number; height: number; unit: number; frame: number }> = ({ width, height, unit, frame }) => {
+const Stage4DocBody: React.FC<{ width: number; height: number; unit: number; frame: number; coverHeight: number }> = ({ width, height, unit, frame, coverHeight }) => {
   const generatedProgress = getStage4StateChangeProgress(frame);
   const coverSwitchProgress = smoothProgress(frame, getStage4SweepStart() + 20, 18);
-  const coverHeight = getDocCoverHeight(width);
 
   return (
     <div style={{ position: "relative", width, height, overflow: "hidden" }}>
@@ -253,18 +270,29 @@ const Stage4DocBody: React.FC<{ width: number; height: number; unit: number; fra
   );
 };
 
-const DefaultDocBody: React.FC<{ width: number; height: number; unit: number; detailsOpacity?: number }> = ({
+const DefaultDocBody: React.FC<{
+  width: number;
+  height: number;
+  unit: number;
+  coverHeight: number;
+  detailsGap: number;
+  detailsOpacity?: number;
+}> = ({
   width,
   height,
   unit,
+  coverHeight,
+  detailsGap,
   detailsOpacity = 1,
 }) => {
   const frame = useCurrentFrame();
+  const text = useCopy();
   const detailProgress = clamp(detailsOpacity);
-  const gap = detailProgress > 0 ? 10 * unit * detailProgress : 0;
-  const coverHeight = getDocCoverHeight(width);
-  const detailsHeight =
-    detailProgress > 0 ? Math.min(56 * unit, Math.max(0, height - coverHeight - gap)) * detailProgress : 0;
+  const gap = detailProgress > 0 ? detailsGap * detailProgress : 0;
+  const detailsHeight = detailProgress > 0 ? Math.max(0, height - coverHeight - gap) * detailProgress : 0;
+  const thirdLineFitProgress = clamp((detailsHeight - 64 * unit) / (8 * unit));
+  const thirdLineGrowStyle = getStage2WidthGrowStyle(frame, 5, docStage2GrowTiming);
+  const thirdLineGrowOpacity = typeof thirdLineGrowStyle.opacity === "number" ? thirdLineGrowStyle.opacity : 1;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", rowGap: gap, width, height, minHeight: 0 }}>
@@ -297,13 +325,13 @@ const DefaultDocBody: React.FC<{ width: number; height: number; unit: number; de
           style={{
             margin: 0,
             color: "#1f2329",
-            fontSize: 12 * unit,
+            fontSize: 8 * unit,
             fontWeight: 600,
             lineHeight: `${16 * unit}px`,
             ...getStage2GrowStyle(frame, 2, { origin: "left center", translateY: 3 * unit, ...docStage2GrowTiming }),
           }}
         >
-          Overall Status: On track
+          {text.overallStatus}
         </p>
         <div style={getStage2WidthGrowStyle(frame, 3, docStage2GrowTiming)}>
           <Line width={Math.min(194 * unit, width)} height={8 * unit} />
@@ -311,7 +339,12 @@ const DefaultDocBody: React.FC<{ width: number; height: number; unit: number; de
         <div style={getStage2WidthGrowStyle(frame, 4, docStage2GrowTiming)}>
           <Line width={width} height={8 * unit} />
         </div>
-        <div style={getStage2WidthGrowStyle(frame, 5, docStage2GrowTiming)}>
+        <div
+          style={{
+            ...thirdLineGrowStyle,
+            opacity: thirdLineGrowOpacity * thirdLineFitProgress,
+          }}
+        >
           <Line width={Math.min(124 * unit, width)} height={8 * unit} />
         </div>
       </div>
@@ -319,19 +352,36 @@ const DefaultDocBody: React.FC<{ width: number; height: number; unit: number; de
   );
 };
 
-const DocContentShell: React.FC<{ width: number; height: number; children: (metrics: { unit: number; bodyWidth: number; bodyHeight: number }) => ReactNode }> = ({
+const DocContentShell: React.FC<{
+  width: number;
+  height: number;
+  children: (metrics: {
+    unit: number;
+    bodyWidth: number;
+    bodyHeight: number;
+    coverHeight: number;
+    detailsGap: number;
+  }) => ReactNode;
+}> = ({
   width,
   height,
   children,
 }) => {
   const frame = useCurrentFrame();
-  const unit = Math.min(width / 214, height / 124);
-  const paddingX = 8 * unit;
-  const paddingY = 8 * unit;
-  const headerHeight = 18 * unit;
-  const gap = 9 * unit;
+  const compactProgress = clamp((190 - height) / (190 - 105.67));
+  const unit = lerp(1, 0.75, compactProgress);
+  const paddingX = lerp(10, 9, compactProgress);
+  const paddingY = lerp(10, 9, compactProgress);
+  const headerHeight = lerp(24, 18, compactProgress);
+  const headerIconSize = lerp(24, 18, compactProgress);
+  const headerGap = lerp(8, 6, compactProgress);
+  const headerFontSize = lerp(12, 10.5, compactProgress);
+  const headerLineHeight = lerp(20, 16, compactProgress);
+  const gap = lerp(10, 9, compactProgress);
   const bodyWidth = Math.max(width - paddingX * 2, 1);
-  const bodyHeight = Math.max(height - paddingY * 2 - headerHeight - gap, 1);
+  const bodyHeight = Math.max(height - paddingY - headerHeight - gap, 1);
+  const coverHeight = Math.min(lerp(80.893, 60.67, compactProgress), bodyHeight);
+  const detailsGap = lerp(10, 9, compactProgress);
 
   return (
     <div
@@ -344,15 +394,28 @@ const DocContentShell: React.FC<{ width: number; height: number; children: (metr
         padding: `${paddingY}px ${paddingX}px`,
         rowGap: gap,
         overflow: "hidden",
-        borderRadius: 12 * unit,
+        borderRadius: lerp(12, 9, compactProgress),
         background: "rgba(255,255,255,0.8)",
         fontFamily,
       }}
     >
-      <div style={getStage2GrowStyle(frame, 0, { origin: "left center", ...docStage2GrowTiming })}>
-        <DocHeader unit={unit} />
+      <div
+        style={{
+          display: "flex",
+          height: headerHeight,
+          flexShrink: 0,
+          ...getStage2GrowStyle(frame, 0, { origin: "left center", ...docStage2GrowTiming }),
+        }}
+      >
+        <DocHeader
+          iconSize={headerIconSize}
+          gap={headerGap}
+          height={headerHeight}
+          fontSize={headerFontSize}
+          lineHeight={headerLineHeight}
+        />
       </div>
-      {children({ unit, bodyWidth, bodyHeight })}
+      {children({ unit, bodyWidth, bodyHeight, coverHeight, detailsGap })}
     </div>
   );
 };
@@ -372,12 +435,14 @@ export const DocContainer = () => {
   return (
     <UIContainer layout={layout} background="rgba(255,255,255,0.8)" backdropFilter="blur(22px)" stage2GradientBorder>
       <DocContentShell width={contentWidth} height={contentHeight}>
-        {({ unit, bodyWidth, bodyHeight }) => {
+        {({ unit, bodyWidth, bodyHeight, coverHeight, detailsGap }) => {
           const defaultBody = (
             <DefaultDocBody
               width={bodyWidth}
               height={bodyHeight}
               unit={unit}
+              coverHeight={coverHeight}
+              detailsGap={detailsGap}
               detailsOpacity={defaultDetailsOpacity}
             />
           );
@@ -387,7 +452,7 @@ export const DocContainer = () => {
           }
 
           if (stage4ContentBlend >= 1) {
-            return <Stage4DocBody width={bodyWidth} height={bodyHeight} unit={unit} frame={frame} />;
+            return <Stage4DocBody width={bodyWidth} height={bodyHeight} unit={unit} frame={frame} coverHeight={coverHeight} />;
           }
 
           return (
@@ -396,7 +461,7 @@ export const DocContainer = () => {
                 {defaultBody}
               </div>
               <div style={{ position: "absolute", inset: 0, opacity: stage4ContentBlend }}>
-                <Stage4DocBody width={bodyWidth} height={bodyHeight} unit={unit} frame={frame} />
+                <Stage4DocBody width={bodyWidth} height={bodyHeight} unit={unit} frame={frame} coverHeight={coverHeight} />
               </div>
             </div>
           );

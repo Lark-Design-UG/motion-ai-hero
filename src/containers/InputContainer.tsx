@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Img, staticFile, useCurrentFrame } from "remotion";
+import { useCopy, useLocale } from "../localization";
+import { localizedFontWeight } from "../typography";
 import {
   getStage4VisualStart,
   getStageTransitionDuration,
@@ -43,9 +45,7 @@ const revealStyle = (progress: number, start: number, end: number): CSSPropertie
   };
 };
 
-const inputFont =
-  '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
-const inputPromptText = "Draft this week's project update";
+const inputFont = "var(--localized-ui-font)";
 const stage4AiTextDelayFrames = -12;
 const readyContentExitDelayFrames = 8;
 
@@ -126,6 +126,8 @@ const InputReadyView: React.FC<{
   pressProgress: number;
   titleProgress: number;
 }> = ({ metrics, pressProgress, titleProgress }) => {
+  const text = useCopy();
+  const inputPromptText = text.inputPrompt;
   const titleHeight = Math.max(14, metrics.height - metrics.padding * 2 - metrics.buttonSize - metrics.gap);
   const sendScale = 1 - 0.18 * Math.sin(Math.PI * pressProgress);
   const sendGlow = Math.sin(Math.PI * pressProgress);
@@ -159,7 +161,7 @@ const InputReadyView: React.FC<{
           overflow: "hidden",
           color: "#1f2329",
           fontSize: metrics.titleFontSize,
-          fontWeight: 700,
+          fontWeight: localizedFontWeight("heading", 700),
           letterSpacing: -0.13,
           lineHeight: `${metrics.titleLineHeight}px`,
         }}
@@ -240,6 +242,7 @@ const DeepThinkingLabel: React.FC<{
   metrics: InputMetrics;
   frame: number;
 }> = ({ metrics, frame }) => {
+  const text = useCopy();
   const sweep = ((frame * 4) % 180) - 45;
 
   return (
@@ -256,7 +259,7 @@ const DeepThinkingLabel: React.FC<{
         whiteSpace: "nowrap",
       }}
     >
-      <span>Deep thinking...</span>
+      <span>{text.deepThinking}</span>
       <span
         style={{
           position: "absolute",
@@ -270,7 +273,7 @@ const DeepThinkingLabel: React.FC<{
           pointerEvents: "none",
         }}
       >
-        Deep thinking...
+        {text.deepThinking}
       </span>
     </p>
   );
@@ -281,6 +284,7 @@ const AiGeneratingView: React.FC<{
   metrics: InputMetrics;
   frame: number;
 }> = ({ icon, metrics, frame }) => {
+  const text = useCopy();
   const textHeight = Math.max(16, metrics.height - metrics.padding * 2 - metrics.statusLineHeight - metrics.gap);
   const lineSlotHeight = Math.min(textHeight, metrics.titleLineHeight * 1.08);
 
@@ -326,7 +330,7 @@ const AiGeneratingView: React.FC<{
             height: lineSlotHeight,
           }}
         >
-          Reviewing project updates...
+          {text.reviewingUpdates}
         </p>
       </div>
     </div>
@@ -341,7 +345,7 @@ const messageTextStyle = (metrics: InputMetrics): CSSProperties => ({
   overflow: "hidden",
   color: "#1f2329",
   fontSize: metrics.titleFontSize,
-  fontWeight: 700,
+  fontWeight: localizedFontWeight("heading", 700),
   letterSpacing: -0.13,
   lineHeight: `${metrics.titleLineHeight}px`,
 });
@@ -383,7 +387,8 @@ const ChatBubble: React.FC<{
     <div
       style={{
         boxSizing: "border-box",
-        width,
+        width: width ?? "fit-content",
+        maxWidth: "100%",
         borderRadius: 7,
         background: blue ? "#ddeaff" : "#ebeced",
         padding: "7px 10px",
@@ -400,7 +405,8 @@ const ChatBubble: React.FC<{
 type MobileImConversationState = "initial" | "animated" | "final";
 
 export const thaiSeanMessage = "อีกสักครู่เรามาคุยกัน เพื่อไล่ดูและปรับให้ตรงกันนะ";
-export const englishSeanMessage = "Let's meet up in a bit to go through them and align!";
+export const englishSeanMessage = "Let's meet in a bit to go through them and align!";
+export const seanDisplayName = "Sean Suwannarat";
 
 const getStateReveal = (state: MobileImConversationState, frame: number, start: number, end: number) => {
   if (state === "initial") {
@@ -440,6 +446,8 @@ const SeanTranslatedBubble: React.FC<{
   translationProgress: number;
   frame: number;
 }> = ({ translationProgress, frame }) => {
+  const text = useCopy();
+  const locale = useLocale();
   const englishProgress = smoothProgress(
     translationProgress,
     stage1ImSeanEnglishFadeStartRatio,
@@ -486,7 +494,10 @@ const SeanTranslatedBubble: React.FC<{
             lineHeight: "14px",
           }}
         >
-          <p style={{ margin: 0 }}>{thaiSeanMessage}</p>
+          <p style={{ margin: 0 }}>
+            <span style={{ color: "#3370ff", whiteSpace: "nowrap" }}>@All&nbsp;</span>
+            {thaiSeanMessage}
+          </p>
           <div
             style={{
               height: `${dividerMargin * 2 * dividerProgress + 1 * dividerProgress}px`,
@@ -517,7 +528,10 @@ const SeanTranslatedBubble: React.FC<{
                 transform: `translateY(${(1 - englishProgress) * 6}px)`,
               }}
             >
-              {englishSeanMessage}
+              <span style={{ color: "#3370ff", whiteSpace: "nowrap" }}>
+                {locale === "zh" ? "@所有人" : "@All"}&nbsp;
+              </span>
+              {text.seanTranslation}
             </p>
           </div>
         </div>
@@ -541,6 +555,7 @@ export const ImResultView: React.FC<{
   conversationOpacity = 1,
   conversationMode = "all",
 }) => {
+  const text = useCopy();
   const seanReveal = getStateReveal(conversationState, frame, stage1ImSeanRevealStartFrame, stage1ImSeanRevealEndFrame);
   const seanTranslationProgress = getStateTranslationProgress(conversationState, frame);
   const showConversation = conversationMode !== "withoutConversation";
@@ -596,7 +611,7 @@ export const ImResultView: React.FC<{
           <Img src={staticFile("ui-icons/mobile-nav-back.svg")} style={{ width: 12, height: 12 }} />
           <div style={{ display: "inline-flex", alignItems: "center", columnGap: 3 }}>
             <p style={{ margin: 0, fontSize: 12, fontWeight: 500, lineHeight: "21px" }}>
-              Website Revamp Project
+              {text.websiteRevampProject}
             </p>
             <Img src={staticFile("ui-icons/mobile-nav-chevron.svg")} style={{ width: 10, height: 10 }} />
           </div>
@@ -616,11 +631,11 @@ export const ImResultView: React.FC<{
             <div style={{ display: "flex", flexDirection: "column", rowGap: 5 }}>
               <div style={{ display: "inline-flex", alignItems: "center", columnGap: 4 }}>
                 <p style={{ margin: 0, color: "#8f959e", fontSize: 8, lineHeight: "13px" }}>
-                  AI Agent
+                  {text.reportSender}
                 </p>
               </div>
               <div style={revealStyle(messageProgress, 0.16, 0.42)}>
-                <ChatBubble>Your project report is ready to review.</ChatBubble>
+                <ChatBubble>{text.reportReady}</ChatBubble>
               </div>
               <div
                 style={{
@@ -636,7 +651,7 @@ export const ImResultView: React.FC<{
                 }}
               >
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 500, lineHeight: "14px" }}>
-                  2026 Q3 Project weekly report
+                  {text.reportTitle}
                 </p>
                 <div style={{ position: "relative", width: 181, height: 68 }}>
                   <Img
@@ -656,7 +671,7 @@ export const ImResultView: React.FC<{
                       lineHeight: "12px",
                     }}
                   >
-                    WEEKLY REPORT
+                    {text.reportCoverTitle}
                   </p>
                   <p
                     style={{
@@ -665,16 +680,16 @@ export const ImResultView: React.FC<{
                       bottom: 7,
                       margin: 0,
                       color: "rgba(255,255,255,0.62)",
-                      fontSize: 22,
+                      fontSize: text.reportPeriod.length > 8 ? 14 : 22,
                       fontWeight: 700,
                       lineHeight: "22px",
                     }}
                   >
-                    2026 Q3
+                    {text.reportPeriod}
                   </p>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #1f23291f", paddingTop: 5 }}>
-                  <p style={{ margin: 0, fontSize: 10, lineHeight: "13px" }}>You can view</p>
+                  <p style={{ margin: 0, fontSize: 10, lineHeight: "13px" }}>{text.youCanView}</p>
                   <span style={{ display: "inline-flex", alignItems: "center", columnGap: 4 }}>
                     <Img src={staticFile("ui-icons/external-link.svg")} style={{ width: 12, height: 12 }} />
                     <Img src={staticFile("ui-icons/open-square.svg")} style={{ width: 12, height: 12 }} />
@@ -694,9 +709,11 @@ export const ImResultView: React.FC<{
                 transformOrigin: "center",
               }}
             >
-              <Img src={staticFile("figma/mqg2gufp-2rv93zn.png")} style={messageAvatarStyle} />
+              <Img src={staticFile("ui-icons/Sean-avatar.png")} style={messageAvatarStyle} />
               <div style={{ display: "flex", flexDirection: "column", rowGap: 5 }}>
-                <p style={{ margin: 0, color: "#8f959e", fontSize: 8, lineHeight: "13px" }}>Sean Davis</p>
+                <p style={{ margin: 0, color: "#8f959e", fontSize: 8, lineHeight: "13px" }}>
+                  {seanDisplayName}
+                </p>
                 <SeanTranslatedBubble translationProgress={seanTranslationProgress} frame={frame} />
               </div>
             </div>
@@ -717,7 +734,7 @@ export const ImResultView: React.FC<{
         }}
       >
         <p style={{ flexGrow: 1, margin: 0, padding: "10px 0 10px 10px", fontSize: 11, lineHeight: "19px" }}>
-          Send to Website Revamp Project
+          {text.sendToProject}
         </p>
         <div
           style={{

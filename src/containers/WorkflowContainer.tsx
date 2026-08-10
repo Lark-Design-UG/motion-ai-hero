@@ -1,10 +1,11 @@
 import { Img, staticFile, useCurrentFrame } from "remotion";
-import { getStage4StateChangeProgress, stageFrames, useContainerLayout } from "./layout";
+import { useCopy, useLocale } from "../localization";
+import { localizedFontWeight } from "../typography";
+import { getStage3To4MorphProgress, getStage4StateChangeProgress, stageFrames, useContainerLayout } from "./layout";
 import { getStage2GrowStyle } from "./stage2Grow";
 import { UIContainer } from "./UIContainer";
 
-const fontFamily =
-  '"Lark Circular", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif';
+const fontFamily = "var(--localized-ui-font)";
 
 const stage4WorkflowExtendHeight = 80;
 
@@ -20,10 +21,21 @@ const workflowStage2GrowTiming = {
 
 const WorkflowContent: React.FC<{ width: number; height: number; progress: number }> = ({ width, height, progress }) => {
   const frame = useCurrentFrame();
+  const locale = useLocale();
+  const text = useCopy();
   const unit = Math.min(width / 329, height / 224);
-  const workflowWidth = width - 24 * unit;
+  const compactProgress = getStage3To4MorphProgress(frame);
+  const paddingX = 10 - compactProgress;
+  const paddingY = 10 - compactProgress;
+  const paddingBottom = 10 - compactProgress;
+  const headerIconSize = 24 - 6 * compactProgress;
+  const headerGap = 8 - 2 * compactProgress;
+  const headerHeight = 24 - 6 * compactProgress;
+  const headerFontSize = 12 - 1.5 * compactProgress;
+  const headerLineHeight = 20 - 3 * compactProgress;
+  const contentGap = 10 - compactProgress;
+  const workflowWidth = Math.max(width - paddingX * 2, 1);
   const workflowHeight = workflowWidth + stage4WorkflowExtendHeight * unit * progress;
-  const workflowLeft = (width - workflowWidth) / 2;
 
   return (
     <div
@@ -33,8 +45,8 @@ const WorkflowContent: React.FC<{ width: number; height: number; progress: numbe
         flexDirection: "column",
         width,
         height,
-        padding: `${11 * unit}px ${13 * unit}px ${12 * unit}px`,
-        rowGap: 10 * unit,
+        padding: `${paddingY}px ${paddingX}px ${paddingBottom}px`,
+        rowGap: contentGap,
         overflow: "hidden",
         borderRadius: 11 * unit,
         background: "rgba(255,255,255,0.8)",
@@ -45,8 +57,9 @@ const WorkflowContent: React.FC<{ width: number; height: number; progress: numbe
         style={{
           display: "flex",
           alignItems: "center",
-          columnGap: 8 * unit,
-          height: 28 * unit,
+          columnGap: headerGap,
+          height: headerHeight,
+          flexShrink: 0,
           ...getStage2GrowStyle(frame, 0, { origin: "left center", ...workflowStage2GrowTiming }),
         }}
       >
@@ -54,16 +67,16 @@ const WorkflowContent: React.FC<{ width: number; height: number; progress: numbe
           style={{
             display: "grid",
             placeItems: "center",
-            width: 28 * unit,
-            height: 28 * unit,
-            borderRadius: 7 * unit,
+            width: headerIconSize,
+            height: headerIconSize,
+            borderRadius: 7 - 2 * compactProgress,
             background: "transparent",
           }}
         >
-          <Img src={staticFile("ui-icons/workflow-condition-diamond.svg")} style={{ width: 18 * unit, height: 18 * unit }} />
+          <Img src={staticFile("ui-icons/workflow-condition-diamond.svg")} style={{ width: headerIconSize, height: headerIconSize }} />
         </div>
-        <p style={{ margin: 0, color: "#1f2329", fontSize: 15 * unit, fontWeight: 800, lineHeight: `${22 * unit}px` }}>
-          Task Management Flow
+        <p style={{ margin: 0, color: "#1f2329", fontSize: headerFontSize, fontWeight: localizedFontWeight("heading", 800), lineHeight: `${headerLineHeight}px` }}>
+          {text.taskManagementFlow}
         </p>
       </div>
       <div
@@ -71,8 +84,7 @@ const WorkflowContent: React.FC<{ width: number; height: number; progress: numbe
           position: "relative",
           width: workflowWidth,
           height: workflowHeight,
-          marginLeft: workflowLeft - 13 * unit,
-          marginTop: -1 * unit,
+          marginTop: -1,
           borderRadius: 8 * unit,
           background: "#f8f9fa",
           overflow: "hidden",
@@ -80,7 +92,11 @@ const WorkflowContent: React.FC<{ width: number; height: number; progress: numbe
         }}
       >
         <Img
-          src={staticFile("ui-icons/workflow-frame-2147229845.svg")}
+          src={staticFile(
+            locale === "zh"
+              ? "ui-icons/workflow-frame-2147229845-CN.svg"
+              : "ui-icons/workflow-frame-2147229845.svg",
+          )}
           style={{
             display: "block",
             width: workflowWidth,
